@@ -1,0 +1,60 @@
+<!doctype html>
+<title>Hello from Flask</title>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+</head>
+<body> 
+    <h1>Your personal pressure data measurement </h1>
+    <div class="chart-container" style="width: 1000px;height:600px">
+		<canvas id="myChart"></canvas>
+	</div>
+<script>
+var ctx = document.getElementById('myChart');
+var lineChartData = {
+			labels: {{time_stamp}},
+			datasets: [{
+				label: 'Pressure readings',
+				borderColor: "Blue",
+				backgroundColor: "Blue",
+				fill: false,
+				data: {{pressure}},
+				yAxisID: 'y-axis-1',
+			}, {
+				label: 'Temperature Readings',
+				borderColor: "Red",
+				backgroundColor: "Red",
+				fill: false,
+				data: {{temperature}},
+				yAxisID: 'y-axis-2'
+			}]
+		};
+var chart_options = {
+			responsive: true,
+			hoverMode: 'index',
+			stacked: false,
+			title: {display: true, text: 'Your flow measurement'},
+			scales: {
+				yAxes: [{
+					type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+					display: true,
+					position: 'left',
+					id: 'y-axis-1',}, 
+					{
+					type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+					display: true,
+					position: 'right',
+					id: 'y-axis-2',
+					gridLines: {
+					drawOnChartArea: false, // only want the grid lines for one axis to show up
+					},
+					}],
+					}
+				};
+var lineChart = new Chart(ctx, {
+    type: 'line',
+    data: lineChartData,
+    options: chart_options
+});
+</script>
+</body>
+</html>
