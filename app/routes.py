@@ -3,7 +3,9 @@ from app import app, db
 from flask import render_template, request, redirect, url_for
 from app.forms import LoginForm
 from app.models import Pressure_data    
-import pandas as pd
+from config import Config
+import os
+import csv
 
 @app.route('/')
 def index():
@@ -37,25 +39,38 @@ def retrive_db(collection_number):
     pressure_data = Pressure_data.query.filter_by(collection_number=collection_number).all()
     return render_template('data.html', pressure_data = pressure_data)
 
-@app.route('/reset_db')
-def reset_db():
-    db.drop_all()
-    db.create_all()
-    df = pd.read_csv("sensor_data.csv", header = None, names=["Time","Pressure"])
-    for _, row in df.iterrows():
-        time_stamp = row["Time"].tolist()
-        pressure = row['Pressure'].tolist()
-        temperature = random.uniform(25,27)
-        pressure_data = Pressure_data(collection_number=1, time_stamp=time_stamp, pressure=pressure, temperature=temperature)
-        db.session.add(pressure_data)
-    db.session.commit()
-    return "Database has been populated"
-
 #Deletes database 
-@app.route('/del_db')
+@app.route('/delete_db')
 def del_db(): 
     db.drop_all()
     return "Tables have been dropped"
+
+#Downloads our whole dataset as csv file
+@app.route('/download_csv')
+def download_csv():
+    filename = "mysql_dump.csv"
+    if url_for('static', filename=filename):
+        return redirect(url_for('static', filename=filename))
+    else:
+        return "Database currently not available"
+
+#Writes the whole database as CSV file 
+@app.route('/write_database_as_csv')
+def write_database_as_csv():
+    filename = "mysql_dump.csv"
+    path = os.path.join(Config.APP_ROOT, "app/static", filename)
+    
+    csv_file = open(path,'w')
+    data = Pressure_data.query.all()
+
+    for row in data:
+        row_as_string = str(row)
+        csv_file.write(row_as_string[1:-1] + '\n')
+
+    csv_file.close()
+
+    return "Database is now availabel under:" + str(url_for('static', filename=filename))
+
 
 
 @app.route('/version')

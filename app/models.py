@@ -7,6 +7,7 @@ class Pressure_data(db.Model):
     pressure = db.Column(db.Float(), index=True)
     temperature = db.Column(db.Float(), index=True)
     
-    def __repr__(self):
-        return '<Pressure data for Timestamp: {}>'.format(self.time_stamp)
+    def __str__(self):
+        return str(self.time_stamp) + "," + str(self.pressure) + "," + str(self.temperature)
+
 
