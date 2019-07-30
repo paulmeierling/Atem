@@ -1,11 +1,11 @@
-import random
-from app import app, db
+from app import app, db, s3
 from flask import render_template, request, redirect, url_for
 from app.forms import LoginForm
 from app.models import Pressure_data    
 from config import Config
-import os
-import csv
+import os, csv, random, datetime
+import boto3
+
 
 @app.route('/')
 def index():
@@ -57,22 +57,23 @@ def download_csv():
 #Writes the whole database as CSV file 
 @app.route('/write_database_as_csv')
 def write_database_as_csv():
-    filename = "mysql_dump.csv"
+    #Write local csv file 
+    filename = "database_dump.csv"
     path = os.path.join(Config.APP_ROOT, "app/static", filename)
-    
-    csv_file = open(path,'w')
+    csv_file = open(path,'w+')
     data = Pressure_data.query.all()
-
     for row in data:
         row_as_string = str(row)
-        csv_file.write(row_as_string[1:-1] + '\n')
-
+        csv_file.write(row_as_string + '\n')
     csv_file.close()
 
-    return "Database is now availabel under:" + str(url_for('static', filename=filename))
-
-
+    #Opload file to AWS S3
+    with open(path,"rb") as s3_file:
+        s3_filename = str(datetime.datetime.now()) + "database_dump.csv"
+        s3.upload_fileobj(s3_file, app.config["S3_BUCKET"], s3_filename)
+    
+    return "File is available under: {}{}".format(app.config["S3_LOCATION"], s3_filename)
 
 @app.route('/version')
 def version():
-    return "v0.4"
+    return "v0.6"

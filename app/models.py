@@ -8,6 +8,6 @@ class Pressure_data(db.Model):
     temperature = db.Column(db.Float(), index=True)
     
     def __str__(self):
-        return str(self.time_stamp) + "," + str(self.pressure) + "," + str(self.temperature)
+        return str(self.collection_number) + "," + str(self.time_stamp) + "," + str(self.pressure) + "," + str(self.temperature)
 
 
