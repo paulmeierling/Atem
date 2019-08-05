@@ -1,4 +1,4 @@
-<h1>Timestamp : Pressure : Temperature </h1>
-{%for data in pressure_data %}
-<p>{{data.collection_number}}: {{data.time_stamp}} , {{data.pressure}}, {{data.temperature}} </p>
+<h1>Timestamp : Pressure : Proximity </h1>
+{%for data in sensor_data %}
+<p>{{data.collection_number}} : {{data.time_stamp}} , {{data.pressure}}, {{data.proximity}} </p>
 {% endfor %}

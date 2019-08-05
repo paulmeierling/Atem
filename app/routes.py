@@ -16,19 +16,23 @@ def show(collection_number):
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure for s in sensor_data]
     proximity = [s.proximity for s in sensor_data]
-    return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, temperature=proximity) #TO BE FIXED
+    return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, proximity=proximity) 
 
 
 # Reads in POST request and writes the values in the database 
 # Expects a JSON file in the body of the post request
 @app.route('/write_sensor_data/<collection_number>', methods=['POST'])
 def write_sensor_data(collection_number):
+    # Delete any data which may be stored at the same dataspot
+    Sensor_data.query.filter_by(collection_number=collection_number).delete() 
+
     for time_stamp in request.form:
         values = request.form[time_stamp].split(";")
         pressure = values[0]
         proximity = values[1]
         sensor_data = Sensor_data(collection_number=collection_number, time_stamp=time_stamp, pressure=pressure, proximity = proximity)
         db.session.add(sensor_data)
+    
     db.session.commit()
     return str(request.form)
 
@@ -36,13 +40,13 @@ def write_sensor_data(collection_number):
 @app.route('/retrive_db/<collection_number>')
 def retrive_db(collection_number): 
     sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
-    return render_template('data.html', pressure_data = sensor_data)
+    return render_template('data.html', sensor_data = sensor_data)
 
 #Deletes database 
 @app.route('/delete_db')
 def del_db(): 
     db.drop_all()
-    return "Tables have been dropped"
+    return "Tables have been cleared"
 
 #Downloads our whole dataset as csv file
 @app.route('/download_csv')
