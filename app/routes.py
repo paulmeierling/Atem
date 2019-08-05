@@ -1,7 +1,6 @@
 from app import app, db, s3
 from flask import render_template, request, redirect, url_for
-from app.forms import LoginForm
-from app.models import Pressure_data    
+from app.models import Sensor_data    
 from config import Config
 import os, csv, random, datetime
 import boto3
@@ -13,11 +12,11 @@ def index():
 
 @app.route('/show/<collection_number>')
 def show(collection_number):
-    pressure_data = Pressure_data.query.filter_by(collection_number=collection_number).all()
-    time_stamp = [p.time_stamp for p in pressure_data]
-    pressure = [p.pressure - 1008 for p in pressure_data]
-    temperature = [p.temperature for p in pressure_data]
-    return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, temperature=temperature)
+    sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
+    time_stamp = [s.time_stamp for s in sensor_data]
+    pressure = [s.pressure for s in sensor_data]
+    proximity = [s.proximity for s in sensor_data]
+    return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, temperature=proximity) #TO BE FIXED
 
 
 # Reads in POST request and writes the values in the database 
@@ -27,17 +26,17 @@ def write_sensor_data(collection_number):
     for time_stamp in request.form:
         values = request.form[time_stamp].split(";")
         pressure = values[0]
-        temperature = values[1]
-        pressure_data = Pressure_data(collection_number=collection_number, time_stamp=time_stamp, pressure=pressure, temperature = temperature)
-        db.session.add(pressure_data)
+        proximity = values[1]
+        sensor_data = Sensor_data(collection_number=collection_number, time_stamp=time_stamp, pressure=pressure, proximity = proximity)
+        db.session.add(sensor_data)
     db.session.commit()
     return str(request.form)
 
 #Retrieve values from database 
 @app.route('/retrive_db/<collection_number>')
 def retrive_db(collection_number): 
-    pressure_data = Pressure_data.query.filter_by(collection_number=collection_number).all()
-    return render_template('data.html', pressure_data = pressure_data)
+    sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
+    return render_template('data.html', pressure_data = sensor_data)
 
 #Deletes database 
 @app.route('/delete_db')
@@ -61,7 +60,7 @@ def write_database_as_csv():
     filename = "database_dump.csv"
     path = os.path.join(Config.APP_ROOT, "app/static", filename)
     csv_file = open(path,'w+')
-    data = Pressure_data.query.all()
+    data = Sensor_data.query.all()
     for row in data:
         row_as_string = str(row)
         csv_file.write(row_as_string + '\n')
@@ -76,4 +75,4 @@ def write_database_as_csv():
 
 @app.route('/version')
 def version():
-    return "v0.6"
+    return "v0.7"
