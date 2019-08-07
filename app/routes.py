@@ -6,21 +6,54 @@ import os, csv, random, datetime
 import boto3
 import numpy as np
 from itertools import compress
+import pandas as pd
 
-#Returns the time when the actuation occoured based on the max gradient of proximity (may be off by 1 )
+#Returns the time when the actuation occurred based on the max gradient of proximity (may be off by 1 )
 def get_actuation_time(time_stamp, proximity):
+    # account for multiple actuations by looking at differentials that meet threshold?
     proximity_diff = np.diff(proximity) / np.diff(time_stamp)
     return time_stamp[np.argmax(proximity_diff)]
 
+# Calculates breath flow rate based on pressure reading
+def calculate_flow_rate(time_stamp, pressure):
+    # Regression model: v = (1.51735241) * P + (-1529.15048679)
+    flows = [((P*1.51735241)+(-1529.15048679))*60 for P in pressure] # (L/min)
+    return flows
+
 #Calculates the time a preson breathes in 
 def get_breathe_in_time(time_stamp, pressure):
-    pressure = [p - 1013.25 for p in pressure]
-    inflow = [1 if (p < -4) else 0 for p in pressure]
-    return inflow
+    # convert all pressure units from hPa to atm
+    #pressure_atm = [hPa/1013.25 for hPa in pressure]
+    # avergae based on the next 10? timepoints 
+    P_0 = pressure_atm[0]
+    pressure_diff = np.diff(pressure) / np.diff(time_stamp)
+    
+    flows = calculate_flow_rate(time_stamp, pressure)
+    # subtract out starting flow rate 
+    flows_norm = [x - flows[0] for x in flows]
+    inflow = [1 if abs(flows_norm[i] > 1) and pressure_diff[i] < 0 else 0 for i in range(len(pressure_diff))]
+    return inflow 
+            
+    #pressure = [p - 1013.25 for p in pressure]
+    #inflow = [1 if (p < -4) else 0 for p in pressure]
+    #return inflow
+
+# Calculates the duration of breath 
+def get_breathe)duration(time_stamp, pressure):
+    pass
 
 @app.route('/')
 def index():
     return redirect(url_for('show', collection_number=1))
+
+@app.route('/flow_rate/<collection_number>')
+def flow_rate(collection_number):
+    sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
+    time_stamp = [s.time_stamp for s in sensor_data]
+    pressure = [s.pressure - 1013.25 for s in sensor_data] #Remove base pressure (1atm)
+    proximity = [s.proximity for s in sensor_data]
+    flow_rate = calculate_flow_rate(time_stamp, pressure)
+    return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, flow_rate=flow_rate) 
 
 @app.route('/show/<collection_number>')
 def show(collection_number):
@@ -118,8 +151,6 @@ def write_database_as_csv():
         s3.upload_fileobj(s3_file, app.config["S3_BUCKET"], s3_filename)
     
     return "File is available under: {}{}".format(app.config["S3_LOCATION"], s3_filename)
-
-print('Testing!')
 
 @app.route('/version')
 def version():
