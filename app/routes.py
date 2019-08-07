@@ -4,7 +4,19 @@ from app.models import Sensor_data
 from config import Config
 import os, csv, random, datetime
 import boto3
+import numpy as np
+from itertools import compress
 
+#Returns the time when the actuation occoured based on the max gradient of proximity (may be off by 1 )
+def get_actuation_time(time_stamp, proximity):
+    proximity_diff = np.diff(proximity) / np.diff(time_stamp)
+    return time_stamp[np.argmax(proximity_diff)]
+
+#Calculates the time a preson breathes in 
+def get_breathe_in_time(time_stamp, pressure):
+    pressure = [p - 1013.25 for p in pressure]
+    inflow = [1 if (p < -4) else 0 for p in pressure]
+    return inflow
 
 @app.route('/')
 def index():
@@ -14,13 +26,44 @@ def index():
 def show(collection_number):
     sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
     time_stamp = [s.time_stamp for s in sensor_data]
-    pressure = [s.pressure for s in sensor_data]
+    pressure = [s.pressure - 1013.25 for s in sensor_data] #Remove base pressure (1atm)
     proximity = [s.proximity for s in sensor_data]
     return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, proximity=proximity) 
 
+#Returns a graph of the proximity sensor and the differntiation of this graph 
+@app.route('/show_diff/<collection_number>')
+def show_diff(collection_number):
+    sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
+    time_stamp = [s.time_stamp for s in sensor_data]
+    pressure = [s.pressure for s in sensor_data]
+    proximity = [s.proximity for s in sensor_data]  
+    
+    pressure_diff = np.diff(pressure) / np.diff(time_stamp) 
+    pressure_diff = pressure_diff.tolist()
+    proximity_diff = np.diff(proximity) / np.diff(time_stamp)
+    proximity_diff = proximity_diff.tolist()
 
-# Reads in POST request and writes the values in the database 
-# Expects a JSON file in the body of the post request
+    return render_template("chart.html", time_stamp=time_stamp, pressure=[], proximity=proximity_diff) 
+
+@app.route('/actuation_time/<collection_number>')
+def actuation_time(collection_number):
+    sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
+    time_stamp = [s.time_stamp for s in sensor_data]
+    proximity = [s.proximity for s in sensor_data]
+    return str(get_actuation_time(time_stamp,proximity))
+
+
+@app.route('/breathe_in_time/<collection_number>')
+def breathe_in_time(collection_number):
+    sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
+    time_stamp = [s.time_stamp for s in sensor_data]
+    pressure = [s.pressure for s in sensor_data]
+    breathe_in_time = get_breathe_in_time(time_stamp, pressure)
+    return render_template("chart.html",time_stamp = time_stamp, pressure = breathe_in_time, proximity = [])
+
+
+
+# Reads in POST request and writes the values in the database - deletes the current dataset at that collection number
 @app.route('/write_sensor_data/<collection_number>', methods=['POST'])
 def write_sensor_data(collection_number):
     # Delete any data which may be stored at the same dataspot
@@ -30,9 +73,8 @@ def write_sensor_data(collection_number):
         values = request.form[time_stamp].split(";")
         pressure = values[0]
         proximity = values[1]
-        sensor_data = Sensor_data(collection_number=collection_number, time_stamp=time_stamp, pressure=pressure, proximity = proximity)
+        sensor_data = Sensor_data(collection_number=collection_number, time_stamp=time_stamp, pressure=pressure, proximity=proximity)
         db.session.add(sensor_data)
-    
     db.session.commit()
     return str(request.form)
 
@@ -79,4 +121,4 @@ def write_database_as_csv():
 
 @app.route('/version')
 def version():
-    return "v0.7"
+    return "v0.8"
