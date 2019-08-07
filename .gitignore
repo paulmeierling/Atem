@@ -5,4 +5,5 @@
 !.elasticbeanstalk/*.global.yml
 .DS_Store
 __pycache__/
+venv/
 notepad.py
