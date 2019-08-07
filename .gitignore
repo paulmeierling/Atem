@@ -8,3 +8,4 @@ __pycache__/
 venv/
 Venv/
 notepad.py
+.vscode/
