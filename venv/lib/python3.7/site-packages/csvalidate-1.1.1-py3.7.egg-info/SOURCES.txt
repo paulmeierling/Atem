@@ -1,0 +1,11 @@
+MANIFEST.in
+README.rst
+setup.cfg
+setup.py
+csvalidate/__init__.py
+csvalidate/reader.py
+csvalidate/writer.py
+csvalidate.egg-info/PKG-INFO
+csvalidate.egg-info/SOURCES.txt
+csvalidate.egg-info/dependency_links.txt
+csvalidate.egg-info/top_level.txt
