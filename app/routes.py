@@ -119,6 +119,8 @@ def write_database_as_csv():
     
     return "File is available under: {}{}".format(app.config["S3_LOCATION"], s3_filename)
 
+print('Testing!')
+
 @app.route('/version')
 def version():
     return "v0.8"
