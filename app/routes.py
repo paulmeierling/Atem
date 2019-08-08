@@ -8,6 +8,11 @@ import numpy as np
 from itertools import compress
 import pandas as pd
 
+def smooth_data(time_stamp, data, title, sample):
+    df = pd.DataFrame(data, columns=[str(title)])
+    df['Rolling Ave'] = df[str(title)].rolling(sample).mean()
+    return df['Rolling Ave'].tolist()
+
 #Returns the time when the actuation occurred based on the max gradient of proximity (may be off by 1 )
 def get_actuation_time(time_stamp, proximity):
     # account for multiple actuations by looking at differentials that meet threshold?
@@ -25,7 +30,7 @@ def get_breathe_in_time(time_stamp, pressure):
     # convert all pressure units from hPa to atm
     #pressure_atm = [hPa/1013.25 for hPa in pressure]
     # avergae based on the next 10? timepoints 
-    P_0 = pressure_atm[0]
+    #P_0 = pressure_atm[0]
     pressure_diff = np.diff(pressure) / np.diff(time_stamp)
     
     flows = calculate_flow_rate(time_stamp, pressure)
@@ -39,7 +44,7 @@ def get_breathe_in_time(time_stamp, pressure):
     #return inflow
 
 # Calculates the duration of breath 
-def get_breathe)duration(time_stamp, pressure):
+def get_breathe_duration(time_stamp, pressure):
     pass
 
 @app.route('/')
@@ -51,7 +56,6 @@ def flow_rate(collection_number):
     sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure - 1013.25 for s in sensor_data] #Remove base pressure (1atm)
-    proximity = [s.proximity for s in sensor_data]
     flow_rate = calculate_flow_rate(time_stamp, pressure)
     return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, flow_rate=flow_rate) 
 
