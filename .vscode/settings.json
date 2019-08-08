@@ -1,3 +1,5 @@
 {
-    "python.pythonPath": "Atem_venv/bin/python"
+
+    "python.pythonPath": "venv/bin/python"
+
 }

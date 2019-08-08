@@ -15,7 +15,7 @@ def smooth_data(time_stamp, data, title, sample):
 
 #Returns the time when the actuation occurred based on the max gradient of proximity (may be off by 1 )
 def get_actuation_time(time_stamp, proximity):
-    # account for multiple actuations by looking at differentials that meet threshold?
+    #TO DO account for multiple actuations by looking at differentials that meet threshold?
     proximity_diff = np.diff(proximity) / np.diff(time_stamp)
     return time_stamp[np.argmax(proximity_diff)]
 
@@ -49,7 +49,10 @@ def get_breathe_duration(time_stamp, pressure):
 
 @app.route('/')
 def index():
-    return redirect(url_for('show', collection_number=1))
+    collection_numbers = Sensor_data.query.with_entities(Sensor_data.collection_number).distinct()
+    print(collection_numbers)
+    collection_numbers = [c.collection_number for c in collection_numbers]
+    return render_template("index.html", collection_numbers = collection_numbers)
 
 @app.route('/flow_rate/<collection_number>')
 def flow_rate(collection_number):
@@ -57,7 +60,7 @@ def flow_rate(collection_number):
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure - 1013.25 for s in sensor_data] #Remove base pressure (1atm)
     flow_rate = calculate_flow_rate(time_stamp, pressure)
-    return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, flow_rate=flow_rate) 
+    return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, proximity=flow_rate) 
 
 @app.route('/show/<collection_number>')
 def show(collection_number):

@@ -10,6 +10,7 @@ class Config(object):
     FLASK_ENV = 'development'
     DEBUG = True
     TESTING = True
+    TEMPLATES_AUTO_RELOAD = True
     APP_ROOT = os.path.dirname(os.path.abspath(__file__))  
     
     #S3 CONFIG
