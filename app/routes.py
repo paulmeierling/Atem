@@ -58,7 +58,7 @@ def index():
 def flow_rate(collection_number):
     sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
     time_stamp = [s.time_stamp for s in sensor_data]
-    pressure = [s.pressure - 1013.25 for s in sensor_data] #Remove base pressure (1atm)
+    pressure = [s.pressure for s in sensor_data] 
     flow_rate = calculate_flow_rate(time_stamp, pressure)
     return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, proximity=flow_rate) 
 

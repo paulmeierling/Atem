@@ -1,10 +1,15 @@
 import pandas as pd
+import numpy as np
 import requests
-import json
 from random import randint
-import random
+import random, json
 import sys
 import time
+
+df = pd.read_csv("app/static/database_dump.csv")
+a = df.iloc[:,1]
+a = a.rolling(10).mean()
+print(a)
 
 
 
