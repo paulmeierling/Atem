@@ -8,9 +8,12 @@ import numpy as np
 from itertools import compress
 import pandas as pd
 
-def smooth_data(data, sample):
-    df = pd.DataFrame(data, columns=['Data'])
-    df['Rolling Ave'] = df['Data'].rolling(sample).mean()
+def smooth_data(data, size):
+    data_dict = {'Data':data}
+    df = pd.DataFrame(data_dict)
+    print('before')
+    df['Rolling Ave'] = df['Data'].rolling(size).mean()
+    print('after')
     return df['Rolling Ave'].tolist()
 
 #Returns the time when the actuation occurred based on the max gradient of proximity (may be off by 1 )
@@ -23,7 +26,7 @@ def get_actuation_time(time_stamp, proximity):
 def calculate_flow_rate(time_stamp, pressure):
     # Regression model: v = (1.51735241) * P + (-1529.15048679)
     flows = [((P*1.51735241)+(-1529.15048679))*60 for P in pressure] # (L/min)
-    print(flows)
+    #print(flows)
     return flows
 
 #Calculates the time a preson breathes in 
@@ -61,7 +64,10 @@ def flow_rate(collection_number):
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure for s in sensor_data] #Remove base pressure (1atm)
     flow_rate = calculate_flow_rate(time_stamp, pressure)
+    print('hello')
     flow_rate_smooth = smooth_data(flow_rate, 10)
+    len(time_stamp)
+    len(pressure)
     return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, proximity=flow_rate_smooth) 
 
 @app.route('/show/<collection_number>')
