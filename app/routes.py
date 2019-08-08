@@ -23,6 +23,7 @@ def get_actuation_time(time_stamp, proximity):
 def calculate_flow_rate(time_stamp, pressure):
     # Regression model: v = (1.51735241) * P + (-1529.15048679)
     flows = [((P*1.51735241)+(-1529.15048679))*60 for P in pressure] # (L/min)
+    print(flows)
     return flows
 
 #Calculates the time a preson breathes in 
@@ -58,7 +59,7 @@ def index():
 def flow_rate(collection_number):
     sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
     time_stamp = [s.time_stamp for s in sensor_data]
-    pressure = [s.pressure - 1013.25 for s in sensor_data] #Remove base pressure (1atm)
+    pressure = [s.pressure for s in sensor_data] #Remove base pressure (1atm)
     flow_rate = calculate_flow_rate(time_stamp, pressure)
     return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, proximity=flow_rate) 
 
