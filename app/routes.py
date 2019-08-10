@@ -9,12 +9,7 @@ from itertools import compress
 import pandas as pd
 
 def smooth_data(data, size):
-    data_dict = {'Data':data}
-    df = pd.DataFrame(data_dict)
-    print('before')
-    df['Rolling Ave'] = df['Data'].rolling(size).mean()
-    print('after')
-    return df['Rolling Ave'].tolist()
+    return pd.DataFrame(data).iloc[:,0].rolling(size).mean()
 
 #Returns the time when the actuation occurred based on the max gradient of proximity (may be off by 1 )
 def get_actuation_time(time_stamp, proximity):
@@ -64,10 +59,7 @@ def flow_rate(collection_number):
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure for s in sensor_data]
     flow_rate = calculate_flow_rate(time_stamp, pressure)
-    print('hello')
     flow_rate_smooth = smooth_data(flow_rate, 10)
-    len(time_stamp)
-    len(pressure)
     return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, proximity=flow_rate_smooth) 
 
 @app.route('/show/<collection_number>')
