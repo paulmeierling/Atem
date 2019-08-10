@@ -21,22 +21,46 @@ def get_actuation_time(time_stamp, proximity):
 def calculate_flow_rate(time_stamp, pressure):
     # Regression model: v = (1.51735241) * P + (-1529.15048679)
     flows = [((P*1.51735241)+(-1529.15048679))*60 for P in pressure] # (L/min)
-    #print(flows)
     return flows
 
 #Calculates the time a preson breathes in 
-def get_breathe_in_time(time_stamp, pressure):
-    # convert all pressure units from hPa to atm
-    #pressure_atm = [hPa/1013.25 for hPa in pressure]
-    # avergae based on the next 10? timepoints 
-    #P_0 = pressure_atm[0]
-    pressure_diff = np.diff(pressure) / np.diff(time_stamp)
+def get_breathe_in_time(time_stamp, pressure, size):
+    # Compute moving average on pressure data
+    pressure_rolling = smooth_data(pressure, size)
+
+    # Take pressure differential and isolate inspiration times
+    pressure_diff = np.diff(pressure_rolling) / np.diff(time_stamp)
+    inflow = [1 if i<=-0.75 else 0 for i in pressure_diff]
+    condensed_inflow = [0 for i in range(len(inflow))]
+    last = None
+    for i, val in enumerate(inflow):
+        if val == 1 and last == None:
+            last = i # last time of inspiration
+        elif val == 1:
+            if abs(i-last) <= 15:
+                for j in range(last,i+1):
+                    condensed_inflow[j] = 1
+            last = i
     
-    flows = calculate_flow_rate(time_stamp, pressure)
+    # less than 15 positives in a row (~0.25 s) false positive 
+    #last = None
+    for i, val in enumerate(condensed_inflow):
+        if val == 1 and last == None:
+            last = val # last time without inspiration
+        elif val == 0 and last != None:
+            if abs(i-last) <= 20:
+                print('Current: ', i, ' Last: ', last)
+
+                for j in range(last,i):
+                    condensed_inflow[j] = 0
+            last = None
+    return condensed_inflow    
+
+    #flows = calculate_flow_rate(time_stamp, pressure)
     # subtract out starting flow rate 
-    flows_norm = [x - flows[0] for x in flows]
-    inflow = [1 if abs(flows_norm[i] > 1) and pressure_diff[i] < 0 else 0 for i in range(len(pressure_diff))]
-    return inflow 
+    #flows_norm = [x - flows[0] for x in flows]
+    #inflow = [1 if abs(flows_norm[i] > 1) and pressure_diff[i] < 0 else 0 for i in range(len(pressure_diff))]
+    #return inflow 
             
     #pressure = [p - 1013.25 for p in pressure]
     #inflow = [1 if (p < -4) else 0 for p in pressure]
@@ -60,7 +84,17 @@ def flow_rate(collection_number):
     pressure = [s.pressure for s in sensor_data]
     flow_rate = calculate_flow_rate(time_stamp, pressure)
     flow_rate_smooth = smooth_data(flow_rate, 10)
+
     return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, proximity=flow_rate_smooth) 
+
+@app.route('/inspiration/<collection_number>')
+def inspiration(collection_number):
+    sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
+    time_stamp = [s.time_stamp for s in sensor_data]
+    pressure = [s.pressure for s in sensor_data]
+    rolling_pressure = smooth_data(pressure, 10)
+    inspiration_time = get_breathe_in_time(time_stamp, pressure, 10)
+    return render_template("chart.html", time_stamp=time_stamp, pressure=rolling_pressure, proximity=inspiration_time) 
 
 @app.route('/show/<collection_number>')
 def show(collection_number):
