@@ -1,6 +1,6 @@
 from app import app, db, s3
 from flask import render_template, request, redirect, url_for
-from app.models import Sensor_data    
+from app.models import Sensor_data, Actuation    
 from config import Config
 import os, csv, random, datetime
 import boto3
@@ -41,7 +41,7 @@ def get_breathe_in_time(time_stamp, pressure, size):
                 for j in range(last,i+1):
                     condensed_inflow[j] = 1
             last = i
-    
+
     # less than 15 positives in a row (~0.25 s) false positive 
     #last = None
     for i, val in enumerate(condensed_inflow):
@@ -66,9 +66,6 @@ def get_breathe_in_time(time_stamp, pressure, size):
     #inflow = [1 if (p < -4) else 0 for p in pressure]
     #return inflow
 
-# Calculates the duration of breath 
-def get_breathe_duration(time_stamp, pressure):
-    pass
 
 @app.route('/')
 def index():
@@ -77,6 +74,7 @@ def index():
     collection_numbers = [c.collection_number for c in collection_numbers]
     return render_template("index.html", collection_numbers = collection_numbers)
 
+# Also NAN values
 @app.route('/flow_rate/<collection_number>')
 def flow_rate(collection_number):
     sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
@@ -84,9 +82,9 @@ def flow_rate(collection_number):
     pressure = [s.pressure for s in sensor_data]
     flow_rate = calculate_flow_rate(time_stamp, pressure)
     flow_rate_smooth = smooth_data(flow_rate, 10)
+    return render_template("chart.html", x_values=time_stamp, y1_values=pressure, y2_values=flow_rate_smooth) 
 
-    return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, proximity=flow_rate_smooth) 
-
+#Currently has NAN values
 @app.route('/inspiration/<collection_number>')
 def inspiration(collection_number):
     sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
@@ -94,7 +92,7 @@ def inspiration(collection_number):
     pressure = [s.pressure for s in sensor_data]
     rolling_pressure = smooth_data(pressure, 10)
     inspiration_time = get_breathe_in_time(time_stamp, pressure, 10)
-    return render_template("chart.html", time_stamp=time_stamp, pressure=rolling_pressure, proximity=inspiration_time) 
+    return render_template("chart.html", x_values=time_stamp, y1_values=rolling_pressure, y2_values=inspiration_time) 
 
 @app.route('/show/<collection_number>')
 def show(collection_number):
@@ -102,7 +100,7 @@ def show(collection_number):
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure - 1013.25 for s in sensor_data] #Remove base pressure (1atm)
     proximity = [s.proximity for s in sensor_data]
-    return render_template("chart.html", time_stamp=time_stamp, pressure=pressure, proximity=proximity) 
+    return render_template("chart.html", x_values=time_stamp, y1_values=pressure, y2_values=proximity) 
 
 #Returns a graph of the proximity sensor and the differntiation of this graph 
 @app.route('/show_diff/<collection_number>')
@@ -163,6 +161,8 @@ def retrive_db(collection_number):
 def del_db(): 
     db.drop_all()
     return "Tables have been cleared"
+
+
 
 #Downloads our whole dataset as csv file
 @app.route('/download_csv')

@@ -6,20 +6,24 @@
 <script>
 	var ctx = document.getElementById('myChart');
 	var lineChartData = {
-				labels: {{time_stamp}},
+				labels: {{x_values}},
 				datasets: [{
 					label: 'Pressure readings',
 					borderColor: "Blue",
+					borderWidth: 1,
+					pointRadius: 0,
 					backgroundColor: "Blue",
 					fill: false,
-					data: {{pressure}},
+					data: {{y1_values}},
 					yAxisID: 'y-axis-1',
 				}, {
 					label: 'Proximity Readings',
 					borderColor: "Red",
 					backgroundColor: "Red",
+					borderWidth: 1,
+					pointRadius: 0,
 					fill: false,
-					data: {{proximity}},
+					data: {{y2_values}},
 					yAxisID: 'y-axis-2'
 				}]
 			};

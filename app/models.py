@@ -21,6 +21,6 @@ class Sensor_data(db.Model):
     proximity = db.Column(db.Float(), index=True)
     
     def __str__(self):
-        return str(self.collection_number) + "," + str(self.time_stamp) + "," + str(self.pressure) + "," + str(self.proximity)
+        return str(self.actuation_id) + "," + str(self.time_stamp) + "," + str(self.pressure) + "," + str(self.proximity)
 
 
