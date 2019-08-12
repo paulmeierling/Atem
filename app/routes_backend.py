@@ -9,14 +9,13 @@ from app.routes_helpers import get_breath_duration
 
 # Reads in POST request and writes the values in the database - deletes the current dataset at that collection number
 @app.route('/sensor_data/<actuation_id>', methods=['GET','PUT'])
-def write_sensor_data(actuation_id):
-    # Delete any data which may be stored at the same dataspot
+def sensor_data(actuation_id):
+    #PUT REQUEST CREATES NEW ACTUATION AND SENSOR DATA 
     if request.method == 'PUT':
         #1. Unpack the request.form to fill the three arrays with the values that the sensor has send 
         time_stamp = []
         pressure = []
         proximity = []
-        
         for key in request.form:
             values = request.form.getlist(key)
             time_stamp.append(float(key))
@@ -26,17 +25,36 @@ def write_sensor_data(actuation_id):
         #2. Create Actuation object with the values 
         start_breath, end_breath = get_breath_duration(time_stamp,pressure)
         actuation = Actuation(id=actuation_id, datetime=datetime.datetime.now(), avg_inflow=10, start_breath=start_breath, end_breath=end_breath)
-        db.session.merge(actuation)
+        db.session.merge(actuation) #Merge updates the object if it already exists 
 
         #3. Create sensor_data object with the actual sensor data 
-        Sensor_data.query.filter_by(actuation_id=actuation_id).delete()
+        Sensor_data.query.filter_by(actuation_id=actuation_id).delete() #Delete existing data for this run
         for i in range(0,len(time_stamp)):
             sensor_data = Sensor_data(actuation_id=actuation_id, time_stamp=time_stamp[i], pressure=pressure[i], proximity=proximity[i])
             db.session.add(sensor_data)
         db.session.commit()
-        return "DONE"
+        return "Sensor data has been written to database"
+
+    #GET REQUEST RETURNS THE RELEVANT SENSOR DATA
+    if request.method == 'GET':
+        sensor_data = Sensor_data.query.filter_by(actuation_id=actuation_id).all()
+        response_data = {}
+        for s in sensor_data:
+            response_data[s.time_stamp] = [s.pressure, s.proximity]
+        return response_data
 
 
+@app.route('/actuation_data/<actuation_id>', methods=['GET','PUT'])
+def actuation_data(actuation_id):
+    if request.method == 'GET':
+        ad = Actuation.query.filter_by(id=actuation_id).first()
+        response_data = {"Date" : ad.datetime, "Inflow rate" : ad.avg_inflow, "Start breath" : ad.start_breath, "End breath" : ad.end_breath}
+        return response_data
+        
+
+
+    if request.method == 'PUT':
+        return "To be implemented"
 
 
 #Retrieve values from database 
