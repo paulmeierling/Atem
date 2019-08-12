@@ -24,7 +24,7 @@ def calculate_flow_rate(time_stamp, pressure):
     return flows
 
 #Determines all the times that the user is breathing in 
-def get_breathe_in(pressure, size):
+def get_breath_in(pressure, size):
     # Compute moving average on pressure data
     pressure_rolling = smooth_data(pressure, size)
 
@@ -41,26 +41,11 @@ def get_breathe_in(pressure, size):
                 for j in range(last,i+1):
                     condensed_inflow[j] = 1
             last = i
-    return condensed_inflow, start, stop
-
-
-    #    # less than 15 positives in a row (~0.25 s) false positive 
-    #    #last = None
-    #    for i, val in enumerate(condensed_inflow):
-    #        if val == 1 and last == None:
-    #            last = val # last time without inspiration
-    #        elif val == 0 and last != None:
-    #            if abs(i-last) <= 20:
-    #                print('Current: ', i, ' Last: ', last)
-
-    #                for j in range(last,i):
-    #                    condensed_inflow[j] = 0
-    #            last = None
-    #return condensed_inflow    
+    return condensed_inflow 
 
 #Calculates the start and end of longest breath
 def get_breath_duration(pressure, size):
-    condensed_inflow = get_breathe_in(time_stamp, pressure, size)
+    condensed_inflow = get_breath_in(pressure, size)
     last = None
     longest_stretch = None
     for i, val in condensed_inflow:
@@ -72,7 +57,7 @@ def get_breath_duration(pressure, size):
                 last = i
         # ending on inflow breath
         elif val == 1 and i == len(condensed_inflow):
-            if abs(last-i > abs(longest_stretch[0]-longest_stretch[1]):
+            if abs(last-i) > abs(longest_stretch[0]-longest_stretch[1]):
                 longest_stretch = (last,i-1)
     return longest_stretch
 
