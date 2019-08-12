@@ -24,7 +24,8 @@ def show(actuation_id):
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure - 1013.25 for s in sensor_data] #Remove base pressure (1atm)
     proximity = [s.proximity for s in sensor_data]
-    return render_template("chart.html", x_values=time_stamp, y1_values=pressure, y2_values=proximity) 
+    flow_rate = calculate_flow_rate(pressure)
+    return render_template("chart.html", x_values=time_stamp, y1_values=flow_rate, y2_values=proximity) 
 
 #Returns a graph of the proximity sensor and the differntiation of this graph 
 @app.route('/show_diff/<actuation_id>')
@@ -53,29 +54,28 @@ def actuation_time(actuation_id):
 ########################
 
 # Also NAN values
-@app.route('/flow_rate/<collection_number>')
-def flow_rate(collection_number):
-    sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
+@app.route('/flow_rate/<actuation_id>')
+def flow_rate(actuation_id):
+    sensor_data = Sensor_data.query.filter_by(actuation_id=actuation_id).all()
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure for s in sensor_data]
-    flow_rate = calculate_flow_rate(time_stamp, pressure)
-    flow_rate_smooth = smooth_data(flow_rate, 10)
-    return render_template("chart.html", x_values=time_stamp, y1_values=pressure, y2_values=flow_rate_smooth) 
+    flow_rate = calculate_flow_rate(pressure)
+    flow_rate_smooth = smooth_data(flow_rate, 10).tolist()
+    return render_template("chart.html", x_values=time_stamp, y1_values=flow_rate, y2_values=flow_rate_smooth) 
 
 #Currently has NAN values
-@app.route('/inspiration/<collection_number>')
-def inspiration(collection_number):
-    sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
+@app.route('/breathe_in_time/<actuation_id>')
+def breathe_in_time(actuation_id):
+    sensor_data = Sensor_data.query.filter_by(actuation_id=actuation_id.all())
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure for s in sensor_data]
-    rolling_pressure = smooth_data(pressure, 10)
-    inspiration_time = get_breathe_in_time(time_stamp, pressure, 10)
-    return render_template("chart.html", x_values=time_stamp, y1_values=rolling_pressure, y2_values=inspiration_time) 
-
-@app.route('/breathe_in_time/<collection_number>')
-def breathe_in_time(collection_number):
-    sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
-    time_stamp = [s.time_stamp for s in sensor_data]
-    pressure = [s.pressure for s in sensor_data]
-    breathe_in_time = get_breathe_in_time(time_stamp, pressure)
+    breathe_in_time = get_breath_in(time_stamp, pressure)
     return render_template("chart.html",time_stamp = time_stamp, pressure = breathe_in_time, proximity = [])
+
+@app.route('/average_inflow/<actuation_id>')
+def average_inflow(actuation_id):
+    sensor_data = Sensor_data.query.filter_by(actuation_id=actuation_id).all()
+    time_stamp = [s.time_stamp for s in sensor_data]
+    pressure = [s.pressure for s in sensor_data]
+    longest_stretch = get_breath_duration(time_stamp, pressure)
+    return str(get_average_flow(time_stamp, pressure, longest_stretch))

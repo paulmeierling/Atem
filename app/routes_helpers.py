@@ -9,7 +9,8 @@ from itertools import compress
 import pandas as pd
 
 def smooth_data(data, window=10):
-    return pd.DataFrame(data).iloc[:,0].rolling(window).mean()
+    dataframe = pd.DataFrame(data).iloc[:,0].rolling(window).mean()
+    return dataframe.fillna(dataframe.mean())
 
 #Returns the time when the actuation occurred based on the max gradient of proximity (may be off by 1 )
 def get_actuation_time(time_stamp, proximity):
@@ -60,17 +61,11 @@ def get_breath_duration(time_stamp, pressure, window=10):
             start = None
 
     # returns tuple of (start,end) times for inhalation duration
-    return longest_stretch
+    return (time_stamp[longest_stretch[0]],time_stamp[longest_stretch[1]])
 
 #Calcuate the average flow rate over inhalation stretch 
-def get_average_flow(time_stamp, pressures, longest_stretch):
+def get_average_flow(time_stamp, pressure, longest_stretch):
     # find indices in time_stamp for longest_stretch
-    start_ind = time_stamp.ind(longest_stretch[0])
-    end_ind = time_stamp.ind(longest_stretch[1])
-    return np.mean(calculate_flow_rate(pressures[start_ind:end_ind+1]))
-
-
-
-
-        
-
+    start_ind = time_stamp.index(longest_stretch[0])
+    end_ind = time_stamp.index(longest_stretch[1])
+    return np.mean(calculate_flow_rate(pressure[start_ind:end_ind+1]))
