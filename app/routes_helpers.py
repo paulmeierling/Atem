@@ -72,7 +72,7 @@ def get_breath_duration(pressure, size):
                 last = i
         # ending on inflow breath
         elif val == 1 and i == len(condensed_inflow):
-            if abs(last-i > abs(longest_stretch[0]-longest_stretch[1]):
+            if abs(last-i) > abs(longest_stretch[0]-longest_stretch[1]):
                 longest_stretch = (last,i-1)
     return longest_stretch
 

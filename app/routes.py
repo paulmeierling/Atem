@@ -6,14 +6,13 @@ import os, csv, random, datetime
 import boto3
 import numpy as np
 #from itertools import compress
-from routes_helpers import *
+from app.routes_helpers import *
 
 @app.route('/')
 def index():
-    collection_numbers = Sensor_data.query.with_entities(Sensor_data.collection_number).distinct()
-    print(collection_numbers)
-    collection_numbers = [c.collection_number for c in collection_numbers]
-    return render_template("index.html", collection_numbers = collection_numbers)
+    actuations = Actuation.query.all()
+    actuation_ids = [actuation.id for actuation in actuations ]
+    return render_template("index.html", actuation_ids = actuation_ids)
 
 # Also NAN values
 @app.route('/flow_rate/<collection_number>')

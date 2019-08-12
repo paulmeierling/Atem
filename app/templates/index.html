@@ -15,7 +15,7 @@
         <h1>Actuation timing</h1>
     </div>
   </div>
-{% for n in collection_numbers %}
+{% for n in actuation_ids %}
 <div class="row">
     <div class="col-sm">
         <h2><a href={{ url_for('show', collection_number = n) }}>Run #{{n}}</a></h2>
