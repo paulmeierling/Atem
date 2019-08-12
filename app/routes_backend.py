@@ -16,20 +16,20 @@ def write_sensor_data(actuation_id):
         time_stamp = []
         pressure = []
         proximity = []
-        for key, value in request.form.items():
-            time_stamp.append(float(key))
-            pressure.append(float(value[0]))
-            proximity.append(float(value[1]))
         
-        print(type(time_stamp))
-        print(pressure)
-        print(proximity)
+        for key in request.form:
+            values = request.form.getlist(key)
+            time_stamp.append(float(key))
+            pressure.append(float(values[0]))
+            proximity.append(float(values[1]))
+        
         #2. Create Actuation object with the values 
         start_breath, end_breath = get_breath_duration(time_stamp,pressure)
         actuation = Actuation(id=actuation_id, datetime=datetime.datetime.now(), avg_inflow=10, start_breath=start_breath, end_breath=end_breath)
         db.session.merge(actuation)
 
         #3. Create sensor_data object with the actual sensor data 
+        Sensor_data.query.filter_by(actuation_id=actuation_id).delete()
         for i in range(0,len(time_stamp)):
             sensor_data = Sensor_data(actuation_id=actuation_id, time_stamp=time_stamp[i], pressure=pressure[i], proximity=proximity[i])
             db.session.add(sensor_data)

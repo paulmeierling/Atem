@@ -10,11 +10,11 @@ def post_data():
     end_time = time.time() + 2
     payload = {}
     while (time.time() < end_time):
-        payload[time.time() - start_time] =  [random.uniform(50,100),random.uniform(0,30)]
+        payload[time.time() - start_time] =  [50,30]
         time.sleep(0.1)
 
-
-    response = requests.put('http://127.0.0.1:5000/sensor_data/999', data=payload)
+    response = requests.put('http://127.0.0.1:5000/sensor_data/1', data=payload)
+    #response = requests.put('http://flask-dev.stkbwuuwcd.us-east-1.elasticbeanstalk.com/sensor_data/1', data=payload)
     print(response)
 
 post_data()
