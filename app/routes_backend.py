@@ -45,9 +45,9 @@ def sensor_data(actuation_id):
 
 
 @app.route('/run_summaries/<summary_id>', methods=['GET','PUT'])
-def actuation_data(actuation_id):
+def actuation_data(summary_id):
     if request.method == 'GET':
-        rs = Run_summary.query.filter_by(id=actuation_id).first()
+        rs = Run_summary.query.filter_by(id=summary_id).first()
         response_data = {"Date" : rs.datetime, "Inflow rate" : rs.avg_inflow, "Start breath" : rs.start_breath, "End breath" : rs.end_breath, "Actuation time": rs.actuation_time}
         return response_data
         
