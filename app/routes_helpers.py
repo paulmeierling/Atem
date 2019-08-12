@@ -8,8 +8,8 @@ import numpy as np
 from itertools import compress
 import pandas as pd
 
-def smooth_data(data, size):
-    return pd.DataFrame(data).iloc[:,0].rolling(size).mean()
+def smooth_data(data, window=10):
+    return pd.DataFrame(data).iloc[:,0].rolling(window).mean()
 
 #Returns the time when the actuation occurred based on the max gradient of proximity (may be off by 1 )
 def get_actuation_time(time_stamp, proximity):
@@ -18,15 +18,15 @@ def get_actuation_time(time_stamp, proximity):
     return time_stamp[np.argmax(proximity_diff)]
 
 #Calculates breath flow rate based on pressure reading
-def calculate_flow_rate(time_stamp, pressure):
+def calculate_flow_rate(pressure):
     # Regression model: v = (1.51735241) * P + (-1529.15048679)
     flows = [((P*1.51735241)+(-1529.15048679))*60 for P in pressure] # (L/min)
     return flows
 
 #Determines all the times that the user is breathing in 
-def get_breath_in(time_stamp, pressure, size=10):
+def get_breath_in(time_stamp, pressure, window=10):
     # Compute moving average on pressure data
-    pressure_rolling = smooth_data(pressure, size)
+    pressure_rolling = smooth_data(pressure, window)
 
     # Take pressure differential and isolate inspiration times
     pressure_diff = np.diff(pressure_rolling) / np.diff(time_stamp)
@@ -44,8 +44,8 @@ def get_breath_in(time_stamp, pressure, size=10):
     return condensed_inflow 
 
 #Calculates the start and end of longest breath
-def get_breath_duration(time_stamp, pressure, size=10):
-    condensed_inflow = get_breath_in(time_stamp, pressure, size)
+def get_breath_duration(time_stamp, pressure, window=10):
+    condensed_inflow = get_breath_in(time_stamp, pressure, window)
     start = None
     longest_stretch = (None,None) 
     for i, val in enumerate(condensed_inflow):
@@ -58,7 +58,16 @@ def get_breath_duration(time_stamp, pressure, size=10):
         elif val == 0 and start != None:
             longest_stretch = (start,i-1)
             start = None
+
+    # returns tuple of (start,end) times for inhalation duration
     return longest_stretch
+
+#Calcuate the average flow rate over inhalation stretch 
+def get_average_flow(time_stamp, pressures, longest_stretch):
+    # find indices in time_stamp for longest_stretch
+    start_ind = time_stamp.ind(longest_stretch[0])
+    end_ind = time_stamp.ind(longest_stretch[1])
+    return np.mean(calculate_flow_rate(pressures[start_ind:end_ind+1]))
 
 
 
