@@ -18,7 +18,7 @@
 {% for n in actuation_ids %}
 <div class="row">
     <div class="col-sm">
-        <h2><a href={{ url_for('show', collection_number = n) }}>Run #{{n}}</a></h2>
+        <h2><a href={{ url_for('show', actuation_id = n) }}>Run #{{n}}</a></h2>
     </div>
     <div class="col-sm">
         <button type="button" class="btn btn-success">Shaken</button>
