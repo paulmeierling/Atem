@@ -10,7 +10,7 @@ def post_data():
     end_time = time.time() + 2
     payload = {}
     while (time.time() < end_time):
-        payload[time.time() - start_time] =  [50,30]
+        payload[time.time() - start_time] =  [random.randint(1,100),random.randint(200,500)]
         time.sleep(0.1)
 
     response = requests.put('http://127.0.0.1:5000/sensor_data/1', data=payload)
