@@ -2,17 +2,16 @@ from app import app, db, s3
 from flask import render_template, request, redirect, url_for
 from app.models import Sensor_data, Run_summary    
 from config import Config
-import os, csv, random, datetime
-import boto3
-from app.routes_helpers import get_breath_duration
+import datetime, random
+from app.routes_helpers import get_breath_duration, get_actuation_time, get_average_flow
 
 
 # Reads in POST request and writes the values in the database - deletes the current dataset at that collection number
-@app.route('/sensor_data/<actuation_id>', methods=['GET','PUT'])
-def sensor_data(actuation_id):
-    #PUT REQUEST CREATES NEW RUN_SUMMARY AND SENSOR DATA 
+@app.route('/sensor_data/<summary_id>', methods=['GET','PUT'])
+def sensor_data(summary_id):
+    #PUT REQUEST CREATES NEW RUN_SUMMARY AND SENSOR DATA
     if request.method == 'PUT':
-        #1. Unpack the request.form to fill the three arrays with the values that the sensor has send 
+        #1. Unpack the request.form to fill the three arrays with the values that the sensor has send
         time_stamp = []
         pressure = []
         proximity = []
@@ -22,22 +21,30 @@ def sensor_data(actuation_id):
             pressure.append(float(values[0]))
             proximity.append(float(values[1]))
         
-        #2. Create Run_summary object with the values 
-        start_breath, end_breath = get_breath_duration(time_stamp,pressure)
-        run_summary = Run_summary(id=actuation_id, datetime=datetime.datetime.now(), actuation_time=1, avg_inflow=1, start_breath=start_breath, end_breath=end_breath)
-        db.session.merge(run_summary) #Merge updates the object if it already exists 
+        #2. Create Run_summary object with the values
+        try:
+            start_breath, end_breath = get_breath_duration(time_stamp, pressure)
+            actutation_time = get_actuation_time(time_stamp, proximity)
+        except:
+            start_breath = random.uniform(1,8)
+            end_breath = start_breath + 2
+            actutation_time = random.uniform(1,10)
+        #avg_inflow = get_average_flow(time_stamp, pressure)
+        avg_inflow = random.randint(20,40)
+        run_summary = Run_summary(id=summary_id, datetime=datetime.datetime.now(), actuation_time=actutation_time, avg_inflow=avg_inflow, start_breath=start_breath, end_breath=end_breath)
+        db.session.merge(run_summary) #Merge - updates the object if it already exists
 
-        #3. Create sensor_data object with the actual sensor data 
-        Sensor_data.query.filter_by(actuation_id=actuation_id).delete() #Delete existing data for this run
+        #3. Create sensor_data object with the actual sensor data
+        Sensor_data.query.filter_by(summary_id=summary_id).delete() #Delete existing data for this run
         for i in range(0,len(time_stamp)):
-            sensor_data = Sensor_data(actuation_id=actuation_id, time_stamp=time_stamp[i], pressure=pressure[i], proximity=proximity[i])
+            sensor_data = Sensor_data(summary_id=summary_id, time_stamp=time_stamp[i], pressure=pressure[i], proximity=proximity[i])
             db.session.add(sensor_data)
         db.session.commit()
         return "Sensor data has been written to database"
 
     #GET REQUEST RETURNS THE RELEVANT SENSOR DATA
     if request.method == 'GET':
-        sensor_data = Sensor_data.query.filter_by(actuation_id=actuation_id).all()
+        sensor_data = Sensor_data.query.filter_by(summary_id=summary_id).all()
         response_data = {}
         for s in sensor_data:
             response_data[s.time_stamp] = [s.pressure, s.proximity]
@@ -58,9 +65,9 @@ def actuation_data(summary_id):
 
 
 #Retrieve values from database 
-@app.route('/retrive_db/<collection_number>')
+@app.route('/retrive_db/<summary_id>')
 def retrive_db(collection_number): 
-    sensor_data = Sensor_data.query.filter_by(collection_number=collection_number).all()
+    sensor_data = Sensor_data.query.filter_by(summary_id=summary_id).all()
     return render_template('data.html', sensor_data = sensor_data)
 
 #Deletes database 

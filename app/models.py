@@ -5,6 +5,7 @@ class Run_summary(db.Model):
     datetime = db.Column(db.Date(), index=True)
     description  = db.Column(db.String(400), default="Run description")
 
+    shaken = db.Column(db.Boolean, default=True, index=True)
     actuation_time = db.Column(db.Float(), index=True)
     avg_inflow = db.Column(db.Float(), index=True)
     start_breath = db.Column(db.Float(), index=True)
@@ -16,7 +17,7 @@ class Run_summary(db.Model):
 
 class Sensor_data(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    actuation_id = db.Column(db.Integer, db.ForeignKey(Run_summary.id))
+    summary_id = db.Column(db.Integer, db.ForeignKey(Run_summary.id))
     time_stamp = db.Column(db.Float(), index=True)
     pressure = db.Column(db.Float(), index=True)
     proximity = db.Column(db.Float(), index=True)

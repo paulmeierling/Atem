@@ -1,37 +1,89 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-sm">
-        <h1>Run number</h1>    
-    </div>
-    <div class="col-sm">
-        <h1>Shaking</h1>    
-    </div>
-    <div class="col-sm">
-        <h1>In-flow rate</h1>    
-    </div>
-    <div class="col-sm">
-        <h1>Actuation timing</h1>
-    </div>
-  </div>
-{% for n in actuation_ids %}
-<div class="row">
-    <div class="col-sm">
-        <h2><a href={{ url_for('show', actuation_id = n) }}>Run #{{n}}</a></h2>
-    </div>
-    <div class="col-sm">
-        <button type="button" class="btn btn-success">Shaken</button>
-    </div>
-    <div class="col-sm">
-        <h2><a href={{ url_for('flow_rate', actuation_id = n) }}>Average Flow Rate</a></h2>
-        <!----<button type="button" class="btn btn-warning">Too low</button> -->
-    </div>
-    <div class="col-sm">
-        <button type="button" class="btn btn-danger">Wrong timing</button>
-    </div>
-  </div>
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Date</th>
+        <th scope="col">Shaken</th>
+        <th scope="col">Avg. flow rate</th>
+        <th scope="col">Actuation time</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for summary in summaries %}
+      <div id="accordion">
+      <tr>
+        <th scope="row"><a href="{{ url_for('show', summary_id = summary.id)}}" class="btn btn-secondary btn-lg active" role="button" aria-pressed="true">{{summary.id}}</a>
+        </th>
+        <td>
+            <div class="alert" role="alert">{{summary.datetime}}</div>
+        </td>
+        <td>
+            <div class="alert shaken" role="alert"><a aria-controls="collapseOne" data-toggle="collapse" href="#shaking{{summary.id}}" >Yes</a></div>
+        </td>
+        <td>
+            <div class="alert avg_inflow" role="alert"><a aria-controls="collapseOne" data-toggle="collapse" href="#flow_rate{{summary.id}}">{{summary.avg_inflow}}</a></div>
+        </td>
+        <td>
+            <div class="alert actuation_time" role="alert"><a aria-controls="collapseOne" data-toggle="collapse" href="#actuation_time{{summary.id}}">{{summary.actuation_time}}</a></div>
+        </td>
+      </tr>
+    </div>  
+        <tr>
+            <td colspan="5">
+                <div class="collapse" id="shaking{{summary.id}}">
+                    <div class="card card-body">
+                    <b>Shaken:</b>You are supposed to shake your inhaler before each use, this ensures that you have a full dose loaded when you press it 
+                    </div>
+                </div>
+                <div class="collapse" id="flow_rate{{summary.id}}">
+                        <div class="card card-body">
+                        <b>Inflow-rate</b>Your inflow rate should be between 20 and 30 liter per minute, if you inhaler faster or slower less medication will end up in your lungs
+                        </div>
+                </div>
+                <div class="collapse" id="actuation_time{{summary.id}}">
+                        <div class="card card-body">
+                        <b>Actuation time</b>You should press on the inhaler, while you are breathing in to ensure that you get all the medication in your lung
+                        </div>
+                </div>
+            </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
-{% endfor %}
+{% endblock %}
 
+{% block scripts %}
+<script>
+//Run through all values and color them if they are in the respective range 
+function isBetween(n, a, b) {
+    if(n >= a && n <= b){
+        return 1;}
+    else { return 0;}
+}
+$(document).ready(function(){
+    //Test if shaken == yes
+    $('.shaken').each(function(){
+        if($(this).text() == "Yes"){$(this).toggleClass('.alert alert-success')}
+        else{$(this).toggleClass('.alert alert-danger')}
+    });
+
+    //Test if avg_inflow between 20 and 30 !!!!to be changed !!!!
+    $('.avg_inflow').each(function(){
+        if( isBetween(parseFloat($(this).text()),20,30))
+        {$(this).toggleClass('.alert alert-success')}
+        else{$(this).toggleClass('.alert alert-danger')}
+    });
+    
+    //Test if actuation time is between 3 and 5 !!!!to be changed !!!!
+    $('.actuation_time').each(function(){
+        if( isBetween(parseFloat($(this).text()),3,5))
+        {$(this).toggleClass('.alert alert-success')}
+        else{$(this).toggleClass('.alert alert-danger')}
+    });
+});
+</script>
 {% endblock %}
