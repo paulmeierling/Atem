@@ -42,35 +42,19 @@ def show_diff(actuation_id):
 
     return render_template("chart.html", x_values=time_stamp, y1_values=[], y2_values=proximity_diff) 
 
-@app.route('/actuation_time/<actuation_id>')
-def actuation_time(actuation_id):
-    sensor_data = Sensor_data.query.filter_by(actuation_id=actuation_id).all()
-    time_stamp = [s.time_stamp for s in sensor_data]
-    proximity = [s.proximity for s in sensor_data]
-    return str(get_actuation_time(time_stamp,proximity))
-
 ########################
 ### Sensor database ####
-########################
-
-# Also NAN values
-@app.route('/flow_rate/<actuation_id>')
-def flow_rate(actuation_id):
-    sensor_data = Sensor_data.query.filter_by(actuation_id=actuation_id).all()
-    time_stamp = [s.time_stamp for s in sensor_data]
-    pressure = [s.pressure for s in sensor_data]
-    flow_rate = calculate_flow_rate(pressure)
-    flow_rate_smooth = smooth_data(flow_rate, 10).tolist()
-    return render_template("chart.html", x_values=time_stamp, y1_values=flow_rate, y2_values=flow_rate_smooth) 
+######################## 
 
 #Currently has NAN values
 @app.route('/breathe_in_time/<actuation_id>')
 def breathe_in_time(actuation_id):
-    sensor_data = Sensor_data.query.filter_by(actuation_id=actuation_id.all())
+    sensor_data = Sensor_data.query.filter_by(actuation_id=actuation_id).all()
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure for s in sensor_data]
-    breathe_in_time = get_breath_in(time_stamp, pressure)
-    return render_template("chart.html",time_stamp = time_stamp, pressure = breathe_in_time, proximity = [])
+    breathe_in = get_breath_in(time_stamp, pressure)
+    print(breathe_in)
+    return render_template("chart.html",time_stamp = time_stamp, pressure = breathe_in, proximity = [])
 
 @app.route('/average_inflow/<actuation_id>')
 def average_inflow(actuation_id):
