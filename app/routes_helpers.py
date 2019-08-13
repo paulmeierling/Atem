@@ -31,8 +31,8 @@ def get_breath_in(time_stamp, pressure, window=10):
     pressure_rolling = smooth_data(pressure, window)
 
     # Take pressure differential and isolate inspiration times
-    pressure_diff = np.diff(pressure_rolling) / np.diff(time_stamp)
-    inflow = [1 if i<=-0.75 else 0 for i in pressure_diff]
+    pressure_diff = np.diff(pressure_rolling.tolist()) / np.diff(time_stamp)
+    inflow = [1 if i<=-0.5 else 0 for i in pressure_diff]
     condensed_inflow = [0 for i in range(len(inflow))]
     last = None
     for i, val in enumerate(inflow):
