@@ -5,12 +5,12 @@ class Run_summary(db.Model):
     datetime = db.Column(db.Date(), index=True)
     description  = db.Column(db.String(400), default="Run description")
 
-    shaken = db.Column(db.Boolean, default=True, index=True)
+    shaken = db.Column(db.Boolean(), default=True, index=True)
     actuation_time = db.Column(db.Float(), index=True)
     avg_inflow = db.Column(db.Float(), index=True)
     start_breath = db.Column(db.Float(), index=True)
     end_breath = db.Column(db.Float(), index=True)
-    good_coordinatioon = db.Column(db.Boolean, index=True)
+    good_coordination = db.Column(db.Boolean(), index=True)
     sensor_data = db.relationship('Sensor_data', backref='Run_summary', lazy=True)
 
     def __str__(self):
