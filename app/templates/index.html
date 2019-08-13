@@ -21,13 +21,13 @@
             <div class="alert" role="alert">{{summary.datetime}}</div>
         </td>
         <td>
-            <div class="alert shaken" role="alert"><a aria-controls="collapseOne" data-toggle="collapse" href="#shaking{{summary.id}}" >Yes</a></div>
+            <div class="alert shaken" role="alert"><a class="alert-link" data-toggle="collapse" href="#shaking{{summary.id}}" >Yes</a></div>
         </td>
         <td>
-            <div class="alert avg_inflow" role="alert"><a aria-controls="collapseOne" data-toggle="collapse" href="#flow_rate{{summary.id}}">{{summary.avg_inflow}}</a></div>
+            <div class="alert avg_inflow" role="alert"><a class="alert-link" data-toggle="collapse" href="#flow_rate{{summary.id}}">{{summary.avg_inflow}}</a></div>
         </td>
         <td>
-            <div class="alert actuation_time" role="alert"><a aria-controls="collapseOne" data-toggle="collapse" href="#actuation_time{{summary.id}}">{{summary.actuation_time}}</a></div>
+            <div class="alert actuation_time" role="alert"><a class="alert-link" data-toggle="collapse" href="#actuation_time{{summary.id}}">{{summary.actuation_time}}</a></div>
         </td>
       </tr>
     </div>  
@@ -75,6 +75,8 @@ $(document).ready(function(){
     $('.avg_inflow').each(function(){
         if( isBetween(parseFloat($(this).text()),20,30))
         {$(this).toggleClass('.alert alert-success')}
+        else if( isBetween(parseFloat($(this).text()),30,40))
+        {$(this).toggleClass('.alert alert-warning')}
         else{$(this).toggleClass('.alert alert-danger')}
     });
     

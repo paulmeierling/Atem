@@ -31,7 +31,8 @@ def sensor_data(summary_id):
             actutation_time = random.uniform(1,10)
         #avg_inflow = get_average_flow(time_stamp, pressure)
         avg_inflow = random.randint(20,40)
-        run_summary = Run_summary(id=summary_id, datetime=datetime.datetime.now(), actuation_time=actutation_time, avg_inflow=avg_inflow, start_breath=start_breath, end_breath=end_breath)
+        shaken = random.choice([True, False])
+        run_summary = Run_summary(id=summary_id, datetime=datetime.datetime.now(), actuation_time=actutation_time, shaken=shaken, avg_inflow=avg_inflow, start_breath=start_breath, end_breath=end_breath)
         db.session.merge(run_summary) #Merge - updates the object if it already exists
 
         #3. Create sensor_data object with the actual sensor data
