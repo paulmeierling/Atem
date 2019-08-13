@@ -15,12 +15,12 @@ from app.routes_helpers import *
 @app.route('/')
 def index():
     summaries = Run_summary.query.all()
-    actuation_ids = [run_summary.id for run_summary in summaries]
-    return render_template("index.html", actuation_ids = actuation_ids)
+    summary_ids = [run_summary.id for run_summary in summaries]
+    return render_template("index.html", summaries = summaries)
 
-@app.route('/show/<actuation_id>')
-def show(actuation_id):
-    sensor_data = Sensor_data.query.filter_by(actuation_id=actuation_id).all()
+@app.route('/show/<summary_id>')
+def show(summary_id):
+    sensor_data = Sensor_data.query.filter_by(summary_id=summary_id).all()
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure - 1013.25 for s in sensor_data] #Remove base pressure (1atm)
     proximity = [s.proximity for s in sensor_data]
@@ -28,9 +28,9 @@ def show(actuation_id):
     return render_template("chart.html", x_values=time_stamp, y1_values=flow_rate, y2_values=proximity) 
 
 #Returns a graph of the proximity sensor and the differntiation of this graph 
-@app.route('/show_diff/<actuation_id>')
-def show_diff(actuation_id):
-    sensor_data = Sensor_data.query.filter_by(actuation_id=actuation_id).all()
+@app.route('/show_diff/<summary_id>')
+def show_diff(summary_id):
+    sensor_data = Sensor_data.query.filter_by(summary_id=summary_id).all()
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure for s in sensor_data]
     proximity = [s.proximity for s in sensor_data]  
@@ -47,18 +47,18 @@ def show_diff(actuation_id):
 ######################## 
 
 #Currently has NAN values
-@app.route('/breathe_in_time/<actuation_id>')
-def breathe_in_time(actuation_id):
-    sensor_data = Sensor_data.query.filter_by(actuation_id=actuation_id).all()
+@app.route('/breathe_in_time/<summary_id>')
+def breathe_in_time(summary_id):
+    sensor_data = Sensor_data.query.filter_by(summary_id=summary_id).all()
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure for s in sensor_data]
     breathe_in = get_breath_in(time_stamp, pressure)
     print(breathe_in)
-    return render_template("chart.html",time_stamp = time_stamp, pressure = pressure, proximity = breathe_in)
+    return render_template("chart.html",x_values=time_stamp, y1_values=pressure, y2_values=breathe_in)
 
-@app.route('/average_inflow/<actuation_id>')
-def average_inflow(actuation_id):
-    sensor_data = Sensor_data.query.filter_by(actuation_id=actuation_id).all()
+@app.route('/average_inflow/<summary_id>')
+def average_inflow(summary_id):
+    sensor_data = Sensor_data.query.filter_by(summary_id=summary_id).all()
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure for s in sensor_data]
     longest_stretch = get_breath_duration(time_stamp, pressure)
