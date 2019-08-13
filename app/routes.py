@@ -14,8 +14,8 @@ from app.routes_helpers import *
 
 @app.route('/')
 def index():
-    actuations = Actuation.query.all()
-    actuation_ids = [actuation.id for actuation in actuations]
+    summaries = Run_summary.query.all()
+    actuation_ids = [run_summary.id for run_summary in summaries]
     return render_template("index.html", actuation_ids = actuation_ids)
 
 @app.route('/show/<actuation_id>')
