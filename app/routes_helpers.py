@@ -74,7 +74,7 @@ def get_average_flow(time_stamp, pressure, longest_stretch):
     return np.mean(calculate_flow_rate(pressure[start_ind:end_ind+1]))
 
 #Determine if actuation occurred during longest stretch on inhalation
-def get_coordination(actuation_time, longest_streth)
+def get_coordination(actuation_time, longest_stretch):
     breath_start, breath_end = longest_stretch
     # return True if good coordination, else return False
     if breath_start < actuation_time  and actuation_time < breath_end:
