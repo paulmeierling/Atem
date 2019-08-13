@@ -8,6 +8,7 @@ import numpy as np
 from itertools import compress
 import pandas as pd
 
+#Calculates moving average on data to smooth curve for taking differential 
 def smooth_data(data, window=10):
     dataframe = pd.DataFrame(data).iloc[:,0].rolling(window).mean()
     return dataframe.fillna(dataframe.mean())

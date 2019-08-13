@@ -1,6 +1,6 @@
 from app import app, db, s3
 from flask import render_template, request, redirect, url_for
-from app.models import Sensor_data, Run_summary    
+from app.models import Sensor_data, Run_summary   
 from config import Config
 import os, csv, random, datetime
 import boto3
@@ -9,25 +9,24 @@ import numpy as np
 from app.routes_helpers import *
 
 ##########################
-### Run_summary database ###
+### Actuation database ###
 ##########################
 
 @app.route('/')
 def index():
-    summaries = Run_summary.query.all()
-    summary_ids = [run_summary.id for run_summary in summaries]
-    return render_template("index.html", summaries = summaries)
+    actuations = Actuation.query.all()
+    actuation_ids = [actuation.id for actuation in actuations]
+    return render_template("index.html", actuation_ids = actuation_ids)
 
-@app.route('/show/<summary_id>')
-def show(summary_id):
-    sensor_data = Sensor_data.query.filter_by(summary_id=summary_id).all()
+@app.route('/show/<actuation_id>')
+def show(actuation_id):
+    sensor_data = Sensor_data.query.filter_by(actuation_id=actuation_id).all()
     time_stamp = [s.time_stamp for s in sensor_data]
     pressure = [s.pressure - 1013.25 for s in sensor_data] #Remove base pressure (1atm)
     proximity = [s.proximity for s in sensor_data]
     flow_rate = calculate_flow_rate(pressure)
     return render_template("chart.html", x_values=time_stamp, y1_values=flow_rate, y2_values=proximity) 
 
-################# OLD AND NOT NEEDED ANYMORE ######### 
 #Returns a graph of the proximity sensor and the differntiation of this graph 
 @app.route('/show_diff/<actuation_id>')
 def show_diff(actuation_id):
@@ -55,7 +54,7 @@ def breathe_in_time(actuation_id):
     pressure = [s.pressure for s in sensor_data]
     breathe_in = get_breath_in(time_stamp, pressure)
     print(breathe_in)
-    return render_template("chart.html",time_stamp = time_stamp, pressure = breathe_in, proximity = [])
+    return render_template("chart.html",time_stamp = time_stamp, pressure = pressure, proximity = breathe_in)
 
 @app.route('/average_inflow/<actuation_id>')
 def average_inflow(actuation_id):
