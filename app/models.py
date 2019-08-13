@@ -10,6 +10,7 @@ class Run_summary(db.Model):
     avg_inflow = db.Column(db.Float(), index=True)
     start_breath = db.Column(db.Float(), index=True)
     end_breath = db.Column(db.Float(), index=True)
+    good_coordinatioon = db.Column(db.Boolean, index=True)
     sensor_data = db.relationship('Sensor_data', backref='Run_summary', lazy=True)
 
     def __str__(self):

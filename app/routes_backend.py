@@ -3,7 +3,7 @@ from flask import render_template, request, redirect, url_for
 from app.models import Sensor_data, Run_summary    
 from config import Config
 import datetime, random
-from app.routes_helpers import get_breath_duration, get_actuation_time, get_average_flow
+from app.routes_helpers import get_breath_duration, get_actuation_time, get_average_flow, get_coordination
 
 
 # Reads in POST request and writes the values in the database - deletes the current dataset at that collection number
@@ -24,15 +24,18 @@ def sensor_data(summary_id):
         #2. Create Run_summary object with the values
         try:
             start_breath, end_breath = get_breath_duration(time_stamp, pressure)
-            actutation_time = get_actuation_time(time_stamp, proximity)
+            actuation_time = get_actuation_time(time_stamp, proximity)
         except:
             start_breath = random.uniform(1,8)
             end_breath = start_breath + 2
-            actutation_time = random.uniform(1,10)
-        #avg_inflow = get_average_flow(time_stamp, pressure)
+            actuation_time = random.uniform(1,10)
+        # TODO: uncomment two lines below once regression performed with lab data
+        longest_stretch = (start_breath, end_breath)
+        #avg_inflow = get_average_flow(time_stamp, pressure, longest_stretch)
         avg_inflow = random.randint(20,40)
         shaken = random.choice([True, False])
-        run_summary = Run_summary(id=summary_id, datetime=datetime.datetime.now(), actuation_time=actutation_time, shaken=shaken, avg_inflow=avg_inflow, start_breath=start_breath, end_breath=end_breath)
+        good_coordination = get_coordination(actuation_time, longest_stretch)
+        run_summary = Run_summary(id=summary_id, datetime=datetime.datetime.now(), actuation_time=actuation_time, shaken=shaken, avg_inflow=avg_inflow, start_breath=start_breath, end_breath=end_breath, good_coordination=good_coordination)
         db.session.merge(run_summary) #Merge - updates the object if it already exists
 
         #3. Create sensor_data object with the actual sensor data

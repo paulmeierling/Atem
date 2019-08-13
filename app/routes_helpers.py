@@ -32,6 +32,7 @@ def get_breath_in(time_stamp, pressure, window=10):
 
     # Take pressure differential and isolate inspiration times
     pressure_diff = np.diff(pressure_rolling.tolist()) / np.diff(time_stamp)
+    # NOTE: maximum slope to be adjusted based on lab data 
     inflow = [1 if i<=-0.5 else 0 for i in pressure_diff]
     condensed_inflow = [0 for i in range(len(inflow))]
     last = None
@@ -39,7 +40,8 @@ def get_breath_in(time_stamp, pressure, window=10):
         if val == 1 and last == None:
             last = i # last time of inspiration
         elif val == 1:
-            if abs(i-last) <= 15:
+            # NOTE: number of data points merged to be adjusted based on lab data 
+            if abs(i-last) <= 25:
                 for j in range(last,i+1):
                     condensed_inflow[j] = 1
             last = i
@@ -70,3 +72,12 @@ def get_average_flow(time_stamp, pressure, longest_stretch):
     start_ind = time_stamp.index(longest_stretch[0])
     end_ind = time_stamp.index(longest_stretch[1])
     return np.mean(calculate_flow_rate(pressure[start_ind:end_ind+1]))
+
+#Determine if actuation occurred during longest stretch on inhalation
+def get_coordination(actuation_time, longest_streth)
+    breath_start, breath_end = longest_stretch
+    # return True if good coordination, else return False
+    if breath_start < actuation_time  and actuation_time < breath_end:
+        return True
+    else:
+        return False 
