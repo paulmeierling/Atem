@@ -21,7 +21,7 @@
             <div class="alert" role="alert">{{summary.datetime}}</div>
         </td>
         <td>
-            <div class="alert shaken" role="alert"><a class="alert-link" data-toggle="collapse" href="#shaking{{summary.id}}" >Yes</a></div>
+            <div class="alert shaken" role="alert"><a class="alert-link" data-toggle="collapse" href="#shaking{{summary.id}}">{% if summary.shaken %}Yes{% else %}No{% endif %}</a></div>
         </td>
         <td>
             <div class="alert avg_inflow" role="alert"><a class="alert-link" data-toggle="collapse" href="#flow_rate{{summary.id}}">{{summary.avg_inflow}}</a></div>
@@ -67,8 +67,12 @@ function isBetween(n, a, b) {
 $(document).ready(function(){
     //Test if shaken == yes
     $('.shaken').each(function(){
-        if($(this).text() == "Yes"){$(this).toggleClass('.alert alert-success')}
-        else{$(this).toggleClass('.alert alert-danger')}
+        if($(this).text() === "Yes"){
+            $(this).toggleClass('.alert alert-success');
+        }
+        else{
+            $(this).toggleClass('.alert alert-danger');
+        }
     });
 
     //Test if avg_inflow between 20 and 30 !!!!to be changed !!!!

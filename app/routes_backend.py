@@ -22,19 +22,16 @@ def sensor_data(summary_id):
             proximity.append(float(values[1]))
         
         #2. Create Run_summary object with the values
-        try:
-            start_breath, end_breath = get_breath_duration(time_stamp, pressure)
-            actuation_time = get_actuation_time(time_stamp, proximity)
-        except:
-            start_breath = random.uniform(1,8)
-            end_breath = start_breath + 2
-            actuation_time = random.uniform(1,10)
-        # TODO: uncomment two lines below once regression performed with lab data
-        longest_stretch = (start_breath, end_breath)
+        start_breath, end_breath = get_breath_duration(time_stamp, pressure)
+        actuation_time = get_actuation_time(time_stamp, proximity)
+        # TODO: uncomment  lines below once regression performed with lab data
         #avg_inflow = get_average_flow(time_stamp, pressure, longest_stretch)
         avg_inflow = random.randint(20,40)
-        shaken = random.choice([True, False])
         good_coordination = get_coordination(actuation_time, longest_stretch)
+
+        longest_stretch = (start_breath, end_breath)
+        shaken = random.choice([True, False])
+
         run_summary = Run_summary(id=summary_id, datetime=datetime.datetime.now(), actuation_time=actuation_time, shaken=shaken, avg_inflow=avg_inflow, start_breath=start_breath, end_breath=end_breath, good_coordination=good_coordination)
         db.session.merge(run_summary) #Merge - updates the object if it already exists
 
@@ -59,7 +56,7 @@ def sensor_data(summary_id):
 def actuation_data(summary_id):
     if request.method == 'GET':
         rs = Run_summary.query.filter_by(id=summary_id).first()
-        response_data = {"Date" : rs.datetime, "Inflow rate" : rs.avg_inflow, "Start breath" : rs.start_breath, "End breath" : rs.end_breath, "Actuation time": rs.actuation_time}
+        response_data = {"Date" : rs.datetime, "Inflow rate" : rs.avg_inflow, "Start breath" : rs.start_breath, "End breath" : rs.end_breath, "Actuation time": rs.actuation_time, "Shaken" : rs.shaken, "Coordination": rs.good_coordination}
         return response_data
         
 
