@@ -1,6 +1,6 @@
 from app import app, db, s3
 from flask import render_template, request, redirect, url_for
-from app.models import Sensor_data, Run_summary   
+from app.models import Sensor_data, Run_summary  
 from config import Config
 import os, csv, random, datetime
 import boto3
@@ -9,13 +9,13 @@ import numpy as np
 from app.routes_helpers import *
 
 ##########################
-### Actuation database ###
+### Run_summary database ###
 ##########################
 
 @app.route('/')
 def index():
-    actuations = Actuation.query.all()
-    actuation_ids = [actuation.id for actuation in actuations]
+    summaries = Run_summary.query.all()
+    actuation_ids = [run_summary.id for run_summary in summaries]
     return render_template("index.html", actuation_ids = actuation_ids)
 
 @app.route('/show/<actuation_id>')
