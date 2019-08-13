@@ -15,8 +15,8 @@ def post_data():
             pressure = float(row[1])
             proximity = float(row[2])
             payload[time] = [pressure, proximity]
-
-    response = requests.put('http://127.0.0.1:5000/sensor_data/4', data=payload)
+    print("CSV read")
+    response = requests.put('http://127.0.0.1:5000/sensor_data/1', data=payload)
     #response = requests.put('http://flask-dev.stkbwuuwcd.us-east-1.elasticbeanstalk.com/sensor_data/3', data=payload)
     print(response)
 

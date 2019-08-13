@@ -20,8 +20,8 @@ class Sensor_data(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     summary_id = db.Column(db.Integer, db.ForeignKey(Run_summary.id))
     time_stamp = db.Column(db.Float(), index=True)
-    pressure = db.Column(db.Float(), index=True)
-    proximity = db.Column(db.Float(), index=True)
+    pressure = db.Column(db.Float(precision="9,5"), index=True)
+    proximity = db.Column(db.Float(precision="9,5"), index=True)
     
     def __str__(self):
         return str(self.actuation_id) + "," + str(self.time_stamp) + "," + str(self.pressure) + "," + str(self.proximity)

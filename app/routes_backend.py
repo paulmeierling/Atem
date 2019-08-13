@@ -3,6 +3,7 @@ from flask import render_template, request, redirect, url_for
 from app.models import Sensor_data, Run_summary    
 from config import Config
 import datetime, random
+from decimal import Decimal
 from app.routes_helpers import get_breath_duration, get_actuation_time, get_average_flow, get_coordination
 
 
@@ -27,9 +28,8 @@ def sensor_data(summary_id):
         # TODO: uncomment  lines below once regression performed with lab data
         #avg_inflow = get_average_flow(time_stamp, pressure, longest_stretch)
         avg_inflow = random.randint(20,40)
-        good_coordination = get_coordination(actuation_time, longest_stretch)
-
         longest_stretch = (start_breath, end_breath)
+        good_coordination = get_coordination(actuation_time, longest_stretch)
         shaken = random.choice([True, False])
 
         run_summary = Run_summary(id=summary_id, datetime=datetime.datetime.now(), actuation_time=actuation_time, shaken=shaken, avg_inflow=avg_inflow, start_breath=start_breath, end_breath=end_breath, good_coordination=good_coordination)
