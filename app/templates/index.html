@@ -27,7 +27,7 @@
             <div class="alert avg_inflow" role="alert"><a class="alert-link" data-toggle="collapse" href="#flow_rate{{summary.id}}">{{summary.avg_inflow}}</a></div>
         </td>
         <td>
-            <div class="alert actuation_time" role="alert"><a class="alert-link" data-toggle="collapse" href="#actuation_time{{summary.id}}">{{summary.actuation_time}}</a></div>
+            <div class="alert actuation_time" role="alert"><a class="alert-link" data-toggle="collapse" href="#actuation_time{{summary.id}}">{{summary.good_coordination}}</a></div>
         </td>
       </tr>
     </div>  
@@ -35,17 +35,19 @@
             <td colspan="5">
                 <div class="collapse" id="shaking{{summary.id}}">
                     <div class="card card-body">
-                    <b>Shaken:</b>You are supposed to shake your inhaler before each use, this ensures that you have a full dose loaded when you press it 
+                    <b>Shaken: </b>You are supposed to shake your inhaler before each use, this ensures that you have a full dose loaded when you press it 
                     </div>
                 </div>
                 <div class="collapse" id="flow_rate{{summary.id}}">
                         <div class="card card-body">
-                        <b>Inflow-rate</b>Your inflow rate should be between 20 and 30 liter per minute, if you inhaler faster or slower less medication will end up in your lungs
+                        <p><b>Inflow-rate: </b>Your inflow rate should be between <b>20 and 30 liters per minute </b>, if you inhaler faster or slower less medication will end up in your lungs.
+                        Your average inflow rate was <b> {{summary.avg_inflow}}</b></p>
                         </div>
                 </div>
                 <div class="collapse" id="actuation_time{{summary.id}}">
                         <div class="card card-body">
-                        <b>Actuation time</b>You should press on the inhaler, while you are breathing in to ensure that you get all the medication in your lung
+                        <p><b>Actuation time: </b>You should press on the inhaler, while you are breathing in to ensure that you get all the medication in your lung. 
+                        You pressed the inhaler at <b>{{summary.actuation_time}} </b> and did breathe in from <b>{{summary.start_breath}} - {{summary.end_breath}} </b></p>
                         </div>
                 </div>
             </td>
@@ -84,9 +86,9 @@ $(document).ready(function(){
         else{$(this).toggleClass('.alert alert-danger')}
     });
     
-    //Test if actuation time is between 3 and 5 !!!!to be changed !!!!
+    //Test if actuation time is true 
     $('.actuation_time').each(function(){
-        if( isBetween(parseFloat($(this).text()),3,5))
+        if($(this).text() === "True")
         {$(this).toggleClass('.alert alert-success')}
         else{$(this).toggleClass('.alert alert-danger')}
     });

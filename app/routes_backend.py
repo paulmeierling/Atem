@@ -59,8 +59,6 @@ def actuation_data(summary_id):
         response_data = {"Date" : rs.datetime, "Inflow rate" : rs.avg_inflow, "Start breath" : rs.start_breath, "End breath" : rs.end_breath, "Actuation time": rs.actuation_time, "Shaken" : rs.shaken, "Coordination": rs.good_coordination}
         return response_data
         
-
-
     if request.method == 'PUT':
         return "To be implemented"
 
