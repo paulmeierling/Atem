@@ -2,7 +2,7 @@ from app import app, db, s3
 from flask import render_template, request, redirect, url_for
 from app.models import Sensor_data, Run_summary    
 from config import Config
-import datetime, random
+import datetime, random, os
 from decimal import Decimal
 from app.routes_helpers import get_breath_duration, get_actuation_time, get_average_flow, get_coordination
 
@@ -56,33 +56,23 @@ def sensor_data(summary_id):
 def actuation_data(summary_id):
     if request.method == 'GET':
         rs = Run_summary.query.filter_by(id=summary_id).first()
-        response_data = {"Date" : rs.datetime, "Inflow rate" : rs.avg_inflow, "Start breath" : rs.start_breath, "End breath" : rs.end_breath, "Actuation time": rs.actuation_time, "Shaken" : rs.shaken, "Coordination": rs.good_coordination}
+        response_data = {"Date" : rs.datetime, "Inflow_rate" : rs.avg_inflow, "Start_breath" : rs.start_breath, "End_breath" : rs.end_breath, "Actuation_time": rs.actuation_time, "Shaken" : rs.shaken, "Coordination": rs.good_coordination}
         return response_data
         
     if request.method == 'PUT':
         return "To be implemented"
 
 
-#Retrieve values from database 
-@app.route('/retrive_db/<summary_id>')
-def retrive_db(collection_number): 
-    sensor_data = Sensor_data.query.filter_by(summary_id=summary_id).all()
-    return render_template('data.html', sensor_data = sensor_data)
-
 #Deletes database 
-@app.route('/delete_db')
-def del_db(): 
-    db.drop_all()
-    return "Tables have been cleared"
+@app.route('/clear_db')
+def clear_db(): 
+    meta = db.metadata
+    for table in reversed(meta.sorted_tables):
+        print('Clear table %s' % table)
+        db.session.execute(table.delete())
+    db.session.commit()
+    return "Database values have been cleared"
 
-#Downloads our whole dataset as csv file
-@app.route('/download_csv')
-def download_csv():
-    filename = "mysql_dump.csv"
-    if url_for('static', filename=filename):
-        return redirect(url_for('static', filename=filename))
-    else:
-        return "Database currently not available"
 
 #Writes the whole database as CSV file 
 @app.route('/write_database_as_csv')
@@ -99,9 +89,8 @@ def write_database_as_csv():
 
     #Opload file to AWS S3
     with open(path,"rb") as s3_file:
-        s3_filename = str(datetime.datetime.now()) + "database_dump.csv"
-        s3.upload_fileobj(s3_file, app.config["S3_BUCKET"], s3_filename)
-    
+        s3_filename = "database_dump.csv"
+        s3.upload_fileobj(s3_file, app.config["S3_BUCKET"], s3_filename, ExtraArgs={'ACL':'public-read'})
     return "File is available under: {}{}".format(app.config["S3_LOCATION"], s3_filename)
 
 @app.route('/version')
