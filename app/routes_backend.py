@@ -24,14 +24,14 @@ def sensor_data(summary_id):
         
         #2. Create Run_summary object with the values
         
-        actuation_time = get_actuation_time(time_stamp, proximity)
+        actuation_time = 0 #NOTE: To be changed once we measure actuation again
         max_inflow = min(calculate_flow_rate(pressure))
 
         good_coordination = False
         shaken = False
-        breath_timing = breath_timing(time_stamp, pressure)
-        start_breath = breath_timing[0]
-        end_breath = breath_timing[1]
+        breath_time = breath_timing(time_stamp, pressure)
+        start_breath = breath_time[0]
+        end_breath = breath_time[1]
 
         #start_breath, end_breath = get_breath_duration(time_stamp, pressure)
         #good_coordination = get_coordination(actuation_time, longest_stretch)
