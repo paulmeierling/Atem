@@ -4,7 +4,7 @@ from app.models import Sensor_data, Run_summary
 from config import Config
 import datetime, random, os
 from decimal import Decimal
-from app.routes_helpers import get_breath_duration, get_actuation_time, get_average_flow, get_coordination, calculate_flow_rate
+from app.routes_helpers import breath_timing, get_actuation_time, get_average_flow, get_coordination, calculate_flow_rate
 
 
 # Reads in POST request and writes the values in the database - deletes the current dataset at that collection number
@@ -29,8 +29,9 @@ def sensor_data(summary_id):
 
         good_coordination = False
         shaken = False
-        start_breath = random.randint(1,5)
-        end_breath = start_breath + random.randint(0,3)
+        breath_timing = breath_timing(time_stamp, pressure)
+        start_breath = breath_timing[0]
+        end_breath = breath_timing[1]
 
         #start_breath, end_breath = get_breath_duration(time_stamp, pressure)
         #good_coordination = get_coordination(actuation_time, longest_stretch)

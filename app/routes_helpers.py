@@ -22,8 +22,25 @@ def smooth_data(data, window=10):
 #Calculates breath flow rate based on pressure reading
 def calculate_flow_rate(pressure):
     # Regression model: v = -18.26216 + (36.90) * P 
-    flows = [-18.26 + 36.90*p for p in pressure] # (L/min)
+    flows = [36.90*p for p in pressure] # (L/min)
     return flows
+
+#Calculates when the person did breath in based if the pressure changes by more than 0.5 (roughly 15 l/min)
+#When the pressure first goes lower than 0.5 -> start timing and when it goes higher again -> end timing
+def breath_timing(time_stamp, pressure):
+    breath_start = 0
+    breath_finish = 0
+    breath_started = False
+    breath_finished = False
+
+    for i in range(0,len(time_stamp)):
+        if breath_started == False and pressure[i] < -0.5:
+            breath_start = time_stamp[i]
+            breath_started = True
+        if breath_started == True and pressure[i] > -0.5 and breath_finished == False:
+            breath_finish = time_stamp[i]
+            breath_finished = True
+    return [breath_start, breath_finish]
 
 #### OLD HELPER FUNCTIONS FROM AVA NOT USED IN PRODUCTION ####
 
