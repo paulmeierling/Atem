@@ -6,14 +6,19 @@ import sys, time, csv
 import requests
 from app.routes_helpers import *
 
+def calculate_flow_rate(pressure):
+    # Regression model: v = -18.26216 + (36.90) * P 
+    flows = [-18.26 + 36.90*(p-baseline) for p in pressure] # (L/min)
+    return flows
+
 def post_data():
     payload = {}
-    with open("sample_sensor_readings.csv") as sensor_csv:
+    with open("Test_run.csv") as sensor_csv:
         reader = csv.reader(sensor_csv, delimiter=',')
         for row in reader:
-            time = float(row[0])
-            pressure = float(row[1])
-            proximity = float(row[2])
+            time = float(row[1])
+            pressure = float(row[3]) -  1018
+            proximity = float(row[4])
             payload[time] = [pressure, proximity]
     print("CSV read")
     response = requests.put('http://127.0.0.1:5000/sensor_data/1', data=payload)

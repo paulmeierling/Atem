@@ -7,7 +7,7 @@
         <th scope="col">#</th>
         <th scope="col">Date</th>
         <th scope="col">Shaken</th>
-        <th scope="col">Avg. flow rate</th>
+        <th scope="col">Max flow rate</th>
         <th scope="col">Actuation time</th>
       </tr>
     </thead>
@@ -24,7 +24,7 @@
             <div class="alert shaken" role="alert"><a class="alert-link" data-toggle="collapse" href="#shaking{{summary.id}}">{% if summary.shaken %}Yes{% else %}No{% endif %}</a></div>
         </td>
         <td>
-            <div class="alert avg_inflow" role="alert"><a class="alert-link" data-toggle="collapse" href="#flow_rate{{summary.id}}">{{summary.avg_inflow}}</a></div>
+            <div class="alert max_inflow" role="alert"><a class="alert-link" data-toggle="collapse" href="#flow_rate{{summary.id}}">{{summary.max_inflow}}</a></div>
         </td>
         <td>
             <div class="alert actuation_time" role="alert"><a class="alert-link" data-toggle="collapse" href="#actuation_time{{summary.id}}">{{summary.good_coordination}}</a></div>
@@ -40,8 +40,8 @@
                 </div>
                 <div class="collapse" id="flow_rate{{summary.id}}">
                         <div class="card card-body">
-                        <p><b>Inflow-rate: </b>Your inflow rate should be between <b>20 and 30 liters per minute </b>, if you inhaler faster or slower less medication will end up in your lungs.
-                        Your average inflow rate was <b> {{summary.avg_inflow}}</b></p>
+                        <p><b>Max Inflow-rate: </b>Your max inflow rate should be between <b>-20 and -30 liters per minute </b>, if you inhaler faster or slower less medication will end up in your lungs.
+                        Your average inflow rate was <b> {{summary.max_inflow}}</b></p>
                         </div>
                 </div>
                 <div class="collapse" id="actuation_time{{summary.id}}">
@@ -77,11 +77,11 @@ $(document).ready(function(){
         }
     });
 
-    //Test if avg_inflow between 20 and 30 !!!!to be changed !!!!
-    $('.avg_inflow').each(function(){
-        if( isBetween(parseFloat($(this).text()),20,30))
+    //Test if max_inflow between 20 and 30 !!!!to be changed !!!!
+    $('.max_inflow').each(function(){
+        if( isBetween(parseFloat($(this).text()),-20,-30))
         {$(this).toggleClass('.alert alert-success')}
-        else if( isBetween(parseFloat($(this).text()),30,40))
+        else if( isBetween(parseFloat($(this).text()),-30,-40))
         {$(this).toggleClass('.alert alert-warning')}
         else{$(this).toggleClass('.alert alert-danger')}
     });

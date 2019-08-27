@@ -7,7 +7,7 @@ class Run_summary(db.Model):
 
     shaken = db.Column(db.Boolean(), default=True, index=True)
     actuation_time = db.Column(db.Float(), index=True)
-    avg_inflow = db.Column(db.Float(), index=True)
+    max_inflow = db.Column(db.Float(), index=True)
     start_breath = db.Column(db.Float(), index=True)
     end_breath = db.Column(db.Float(), index=True)
     good_coordination = db.Column(db.Boolean(), index=True)

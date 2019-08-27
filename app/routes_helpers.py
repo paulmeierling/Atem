@@ -8,22 +8,24 @@ import numpy as np
 from itertools import compress
 import pandas as pd
 
+
+#Returns the time when the actuation occurred based on the max gradient of proximity (may be off by 1 )
+def get_actuation_time(time_stamp, proximity):
+    proximity_diff = np.diff(proximity) / np.diff(time_stamp)
+    return time_stamp[np.argmax(proximity_diff)]
+
 #Calculates moving average on data to smooth curve for taking differential 
 def smooth_data(data, window=10):
     dataframe = pd.DataFrame(data).iloc[:,0].rolling(window).mean()
     return dataframe.fillna(dataframe.mean())
 
-#Returns the time when the actuation occurred based on the max gradient of proximity (may be off by 1 )
-def get_actuation_time(time_stamp, proximity):
-    #TO DO account for multiple actuations by looking at differentials that meet threshold?
-    proximity_diff = np.diff(proximity) / np.diff(time_stamp)
-    return time_stamp[np.argmax(proximity_diff)]
-
 #Calculates breath flow rate based on pressure reading
 def calculate_flow_rate(pressure):
-    # Regression model: v = (1.51735241) * P + (-1529.15048679)
-    flows = [((P*1.51735241)+(-1529.15048679))*60 for P in pressure] # (L/min)
+    # Regression model: v = -18.26216 + (36.90) * P 
+    flows = [-18.26 + 36.90*p for p in pressure] # (L/min)
     return flows
+
+#### OLD HELPER FUNCTIONS FROM AVA NOT USED IN PRODUCTION ####
 
 #Determines all the times that the user is breathing in 
 def get_breath_in(time_stamp, pressure, window=10):
@@ -62,7 +64,7 @@ def get_breath_duration(time_stamp, pressure, window=10):
         elif val == 0 and start != None:
             longest_stretch = (start,i-1)
             start = None
-
+    print(time_stamp)
     # returns tuple of (start,end) times for inhalation duration
     return (time_stamp[longest_stretch[0]],time_stamp[longest_stretch[1]])
 

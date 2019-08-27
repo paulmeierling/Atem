@@ -4,7 +4,7 @@ from app.models import Sensor_data, Run_summary
 from config import Config
 import datetime, random, os
 from decimal import Decimal
-from app.routes_helpers import get_breath_duration, get_actuation_time, get_average_flow, get_coordination
+from app.routes_helpers import get_breath_duration, get_actuation_time, get_average_flow, get_coordination, calculate_flow_rate
 
 
 # Reads in POST request and writes the values in the database - deletes the current dataset at that collection number
@@ -23,16 +23,22 @@ def sensor_data(summary_id):
             proximity.append(float(values[1]))
         
         #2. Create Run_summary object with the values
-        start_breath, end_breath = get_breath_duration(time_stamp, pressure)
+        
         actuation_time = get_actuation_time(time_stamp, proximity)
-        # TODO: uncomment  lines below once regression performed with lab data
-        #avg_inflow = get_average_flow(time_stamp, pressure, longest_stretch)
-        avg_inflow = random.randint(20,40)
-        longest_stretch = (start_breath, end_breath)
-        good_coordination = get_coordination(actuation_time, longest_stretch)
-        shaken = random.choice([True, False])
+        max_inflow = min(calculate_flow_rate(pressure))
 
-        run_summary = Run_summary(id=summary_id, datetime=datetime.datetime.now(), actuation_time=actuation_time, shaken=shaken, avg_inflow=avg_inflow, start_breath=start_breath, end_breath=end_breath, good_coordination=good_coordination)
+        good_coordination = False
+        shaken = False
+        start_breath = random.randint(1,5)
+        end_breath = start_breath + random.randint(0,3)
+
+        #start_breath, end_breath = get_breath_duration(time_stamp, pressure)
+        #good_coordination = get_coordination(actuation_time, longest_stretch)
+        #longest_stretch = (start_breath, end_breath)
+        #max_inflow = get_average_flow(time_stamp, pressure, longest_stretch)
+
+
+        run_summary = Run_summary(id=summary_id, datetime=datetime.datetime.now(), actuation_time=actuation_time, shaken=shaken, max_inflow=max_inflow, start_breath=start_breath, end_breath=end_breath, good_coordination=good_coordination)
         db.session.merge(run_summary) #Merge - updates the object if it already exists
 
         #3. Create sensor_data object with the actual sensor data
@@ -56,7 +62,7 @@ def sensor_data(summary_id):
 def actuation_data(summary_id):
     if request.method == 'GET':
         rs = Run_summary.query.filter_by(id=summary_id).first()
-        response_data = {"Date" : rs.datetime, "Inflow_rate" : rs.avg_inflow, "Start_breath" : rs.start_breath, "End_breath" : rs.end_breath, "Actuation_time": rs.actuation_time, "Shaken" : rs.shaken, "Coordination": rs.good_coordination}
+        response_data = {"Date" : rs.datetime, "Inflow_rate" : rs.max_inflow, "Start_breath" : rs.start_breath, "End_breath" : rs.end_breath, "Actuation_time": rs.actuation_time, "Shaken" : rs.shaken, "Coordination": rs.good_coordination}
         return response_data
         
     if request.method == 'PUT':

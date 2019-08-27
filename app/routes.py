@@ -25,7 +25,7 @@ def show(summary_id):
     pressure = [s.pressure for s in sensor_data] #Remove base pressure (1atm)
     proximity = [s.proximity for s in sensor_data]
     flow_rate = calculate_flow_rate(pressure)
-    return render_template("chart.html", x_values=time_stamp, y1_values=flow_rate, y2_values=proximity) 
+    return render_template("chart.html", x_values=time_stamp, y1_values=flow_rate, y2_values=[]) 
 
 #Returns a graph of the proximity sensor and the differntiation of this graph 
 @app.route('/show_diff/<summary_id>')
