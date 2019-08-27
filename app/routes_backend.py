@@ -69,6 +69,12 @@ def actuation_data(summary_id):
     if request.method == 'PUT':
         return "To be implemented"
 
+@app.route('/get_last_run', methods=['GET'])
+def get_last_run():
+    rs = Run_summary.query.order_by(Run_summary.id.desc()).first()
+    response_data = {"Id":rs.id, "Date" : rs.datetime, "Inflow_rate" : rs.max_inflow, "Start_breath" : rs.start_breath, "End_breath" : rs.end_breath, "Actuation_time": rs.actuation_time, "Shaken" : rs.shaken, "Coordination": rs.good_coordination}
+    return response_data
+
 
 #Deletes database 
 @app.route('/clear_db')
@@ -102,4 +108,4 @@ def write_database_as_csv():
 
 @app.route('/version')
 def version():
-    return "v0.8"
+    return "v1.0"
