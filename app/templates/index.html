@@ -40,8 +40,8 @@
                 </div>
                 <div class="collapse" id="flow_rate{{summary.id}}">
                         <div class="card card-body">
-                        <p><b>Max Inflow-rate: </b>Your max inflow rate should be between <b>-20 and -30 liters per minute </b>, if you inhaler faster or slower less medication will end up in your lungs.
-                        Your average inflow rate was <b> {{summary.max_inflow}}</b></p>
+                        <p><b>Max Inflow-rate: </b>Your max inflow rate should be between <b>-20 and -60 liters per minute </b>, if you inhaler faster or slower less medication will end up in your lungs.
+                        Your maximum inflow rate was <b> {{summary.max_inflow}}</b></p>
                         </div>
                 </div>
                 <div class="collapse" id="actuation_time{{summary.id}}">
@@ -77,13 +77,15 @@ $(document).ready(function(){
         }
     });
 
-    //Test if max_inflow between 20 and 30 !!!!to be changed !!!!
+    //Test if max_inflow between 20 and 60
     $('.max_inflow').each(function(){
-        if( isBetween(parseFloat($(this).text()),-20,-30))
-        {$(this).toggleClass('.alert alert-success')}
-        else if( isBetween(parseFloat($(this).text()),-30,-40))
-        {$(this).toggleClass('.alert alert-warning')}
-        else{$(this).toggleClass('.alert alert-danger')}
+        console.log(parseFloat($(this).text()));
+        var inflow_value = parseFloat($(this).text());
+        if(-20 > inflow_value && inflow_value > -60)
+        {$(this).toggleClass('.alert alert-success');}
+        else if(-60 > inflow_value && inflow_value > -100)
+        {$(this).toggleClass('.alert alert-warning');}
+        else{$(this).toggleClass('.alert alert-danger');}
     });
     
     //Test if actuation time is true 

@@ -17,14 +17,23 @@
 					data: {{y1_values}},
 					yAxisID: 'y-axis-1',
 				}, {
-					label: 'Proximity Readings',
+					label: 'Max Inflow',
 					borderColor: "Red",
 					backgroundColor: "Red",
 					borderWidth: 1,
 					pointRadius: 0,
 					fill: false,
-					data: {{y2_values}},
-					yAxisID: 'y-axis-2'
+					data: Array(500).fill(-60),
+					yAxisID: 'y-axis-1' 
+				},
+				{	label: 'Min Inflow',
+					borderColor: "Green",
+					backgroundColor: "Green",
+					borderWidth: 1,
+					pointRadius: 0,
+					fill: false,
+					data: Array(500).fill(-20),
+					yAxisID: 'y-axis-1'
 				}]
 			};
 	var chart_options = {
