@@ -25,7 +25,7 @@ def sensor_data(summary_id):
         #2. Create Run_summary object with the values
         
         actuation_time = 0 #NOTE: To be changed once we measure actuation again
-        max_inflow = min(calculate_flow_rate(pressure))
+        max_inflow = max(calculate_flow_rate(pressure))
 
         good_coordination = False
         shaken = False
