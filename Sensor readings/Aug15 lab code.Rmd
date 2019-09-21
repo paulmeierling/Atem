@@ -1,0 +1,43 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+
+#Load CSV files
+train14 <- read.csv("~/Downloads/Aug14_train.csv", header=TRUE)
+train15 <- read.csv("~/Downloads/Aug15_train.csv", header=TRUE)
+train16 <- read.csv("~/Downloads/Aug16_smallerchannel.csv", header=TRUE)
+
+#Add adjusted pressure 
+train14$Adj_pressure <- train14$Pressure - mean(subset(train14,Flow_rate == 0)$Pressure)
+train15$Adj_pressure <- train15$Pressure - mean(subset(train15,Flow_rate == 0)$Pressure)
+train16$Adj_pressure <- train16$Pressure - mean(subset(train16,Flow == 0)$Pressure)
+
+sum14 <- train14 %>% group_by(Flow_rate) %>% summarise(mean = mean(Adj_pressure))
+sum15 <- train15 %>% group_by(Flow_rate) %>% summarise(mean = mean(Adj_pressure))
+sum16 <- train16 %>% group_by(Flow) %>% summarise(mean = mean(Adj_pressure))
+
+sum14
+sum15
+sum16
+```
+
+
+Test linear model with breathing data
+```{r}
+test <- read.csv("~/Downloads/Aug14_test.csv", header=TRUE)
+test_base_pressure <- mean(subset(test, test$Id == 1)$Pressure)
+test$Adj_pressure <- test$Pressure - test_base_pressure
+test$Flow_rate <- predict(lm1,newdata=test)
+plot(test$Time,test$Flow_rate,col=test$Id, main="Aug 14 Test run")
+
+test <- read.csv("~/Downloads/Aug15_test.csv", header=TRUE)
+test_base_pressure <- mean(subset(test, test$Id == 1)$Pressure)
+test$Adj_pressure <- test$Pressure - test_base_pressure
+test$Flow_rate <- predict(lm1,newdata=test)
+test <- subset(test, Id < 4)
+plot(test$Time,test$Flow_rate,col=test$Id, main="Aug 15 Test run")
+```

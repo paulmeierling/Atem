@@ -1,0 +1,51 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+Use August 26 Train data module to build linear regression 
+Test this linear regression on test data 
+Aug 26 -> Test Data of Paul breathing in at different speeds over 6 runs
+Aug 27 -> Test Data of Paul breathing in at different speeds over 6 runs
+```{r}
+library(dplyr)
+
+#Load CSV files
+train26 <- read.csv("~/Downloads/Aug26_train.csv", header=FALSE)
+names(train26) <- c("Id", "Flow_rate","Pressure","IR")
+train26$Flow_rate <- -train26$Flow_rate
+base_pressure <- mean(subset(train26, train26$Flow_rate == 0)$Pressure)
+train26$Pressure_adj <- train26$Pressure - base_pressure
+lm1 <- lm(Flow_rate ~ Pressure_adj, data=train26)
+
+train26_smaller <- subset(train26, Pressure_adj >= -1)
+lm_smaller <- lm(Flow_rate ~ Pressure_adj,data=train26_smaller)
+summary(lm_smaller)
+summary(lm1)
+
+plot(train26$Pressure_adj, train26$Flow_rate)
+abline(lm_smaller, col="blue")
+abline(lm1, col="red")
+
+confint(lm1)
+predicted.intervals <- predict(lm_smaller, newdata=train26, interval='confidence',level=0.99)
+
+
+
+test26 <- read.csv("~/Downloads/Aug26_test.csv", header=FALSE)
+names(test26) <- c("Id", "Flow_rate","Pressure","IR")
+base_pressure <- mean(subset(test26, test26$Flow_rate == 0)$Pressure)
+test26$Pressure_adj <- test26$Pressure - base_pressure
+test26$Pred_flow_rate <- predict(lm1, newdata=test26)
+plot(test26$Pred_flow_rate,test26$Id)
+
+test27_2 <- read.csv("~/Downloads/Aug27_test2.csv", header=FALSE)
+names(test27_2) <- c("Id", "Time", "Flow_rate","Pressure","IR")
+base_pressure <- mean(subset(test27_2, test27_2$Flow_rate == 0)$Pressure)
+base_pressure
+test27_2$Pressure_adj <- test27_2$Pressure - base_pressure
+test27_2$Pred_flow_rate <- predict(lm1, newdata=test27_2)
+plot(test27_2$Pred_flow_rate,test27_2$Id)
+
+```
+
+

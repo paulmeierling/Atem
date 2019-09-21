@@ -1,0 +1,29 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+
+df <- read.csv("~/Downloads/Aug15_train.csv", header=TRUE)
+train_base_pressure <- mean(subset(df, df$Id == 1)$Pressure)
+df$Adj_pressure <- df$Pressure - train_base_pressure 
+df$Flow_rate <- -df$Flow_rate
+lm1 <- lm(Flow_rate ~ Adj_pressure , data=df)
+summary(lm1)
+
+test <- read.csv("~/Downloads/Aug14_test.csv", header=TRUE)
+test_base_pressure <- mean(subset(test, test$Id == 1)$Pressure)
+test$Adj_pressure <- test$Pressure - test_base_pressure
+test$Flow_rate <- predict(lm1,newdata=test)
+plot(test$Time,test$Flow_rate,col=test$Id)
+
+test <- read.csv("~/Downloads/Aug15_test.csv", header=TRUE)
+test_base_pressure <- mean(subset(test, test$Id == 1)$Pressure)
+test$Adj_pressure <- test$Pressure - test_base_pressure
+test$Flow_rate <- predict(lm1,newdata=test)
+plot(test$Time,test$Flow_rate,col=test$Id)
+
+
+```
